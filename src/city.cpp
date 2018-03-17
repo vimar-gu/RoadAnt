@@ -1,5 +1,6 @@
 #include <QDebug>
 #include "city.h"
+#include "utils.h"
 #include <math.h>
 #include <sys/time.h>
 #include <iostream>
@@ -7,45 +8,48 @@
 #include <QTextStream>
 #include <QFile>
 #include <QString>
+#include <algorithm>
 using namespace std;
-QString DATA_DIR = "/home/ypbehere/Documents/srtp/ant1/Ant/data/data.txt";
+QString ROAD_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/roadData.txt";
+QString STORE_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/storeData.txt";
 
 CCity::CCity()
 {
-    QFile data(DATA_DIR);
-    if (!data.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        cout << "Open failed." << endl;
+    QFile roadData(ROAD_DATA_DIR);
+    QFile storeData(STORE_DATA_DIR);
+    if (!roadData.open(QIODevice::ReadOnly | QIODevice::Text) || !storeData.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        cout << "Open Failed" << endl;
     }
 
-    QTextStream dataStream(&data);
-    int storeCount = 0;
-    while(!dataStream.atEnd())
-    {
-        dataStream >> _store[storeCount]._pos._x >> _store[storeCount]._pos._y;
-        storeCount++;
-    }
-    _storeNum = storeCount - 1;
-
-    for (int i = 0; i < _driverNum; i++) {
-        _driver[i]._pos._x = _store[i].x();
-        _driver[i]._pos._y = _store[i].y();
-        _driver[i].tempPos = 0;
+    QTextStream roadDataStream(&roadData);
+    int x, y, level;
+    while (!roadDataStream.atEnd()) {
+        roadDataStream >> x >> y;
+        CPos start(x, y);
+        roadDataStream >> x >> y;
+        CPos end(x, y);
+        roadDataStream >> level;
+        CRoad r(start, end, level);
+        _roadList.push_back(r);
     }
 
-    data.close();
-}
-
-double CCity::store2StoreDis(int s1, int s2) {
-    if (s1 != s2) {
-        double xDis = _store[s1].x() - _store[s2].x();
-        double yDis = _store[s1].y() - _store[s2].y();
-        return sqrt(pow(xDis, 2) + pow(yDis, 2));
+    QTextStream storeDataStream(&storeData);
+    int dist;
+    while (!storeDataStream.atEnd()) {
+        storeDataStream >> x >> y;
+        CPos start(x, y);
+        storeDataStream >> x >> y;
+        CPos end(x, y);
+        auto tmpRoad = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r){return r.start() == start && r.end() == end;});
+        storeDataStream >> dist;
+        CStore s(*tmpRoad, dist);
+        _storeList.push_back(s);
     }
-    else return 0.001;
-}
 
-double CCity::store2StoreEta(int s1, int s2) {
-    return 1 / store2StoreDis(s1, s2);
+    _roadNum = _roadList.size();
+    _storeNum = _storeList.size();
+    roadData.close();
+    storeData.close();
 }
 
 void CCity::start() {
@@ -54,10 +58,26 @@ void CCity::start() {
     timer->start(1000);
 }
 
+void CCity::generatePack() {
+    int r = rand() % _storeNum;
+    CStore s = _storeList.at(r);
+    auto pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p) {return p.source() == s;});
+    while (pos == _packWaiting.end()) {
+        r = rand() % _storeNum;
+        s = _storeList.at(r);
+        pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p) {return p.source() == s;});
+    }
+    CRoad road = _roadList.at(r);
+    int d = rand() % road.length();
+    CTarget t(road, d);
+    CPack p(s, t);
+    _packWaiting.push_back(p);
+}
+
 void CCity::fresh() {
     emit needDraw();
 
-    for (int tmpCnt = 0; tmpCnt < _driverNum; tmpCnt++) {
+//    for (int tmpCnt = 0; tmpCnt < _driverNum; tmpCnt++) {
 //        Ant tempAnt(100, 1);
 //        vector<int> tmp = tempAnt.dealWithData();
 
@@ -75,14 +95,46 @@ void CCity::fresh() {
 //        clearStore(_driver[tmpCnt].tempPos);
 //        _storeNum--;
 //        _driver[tmpCnt].tempPos = finalDicision > _driver[tmpCnt].tempPos ? finalDicision - 1 : finalDicision;
-    }
+//    }
 }
 
-void CCity::clearStore(int i) {
-    if (i == _storeNum) return;
-    while (i + 1 < _storeNum) {
-        _store[i]._pos._x = _store[i+1].x();
-        _store[i]._pos._y = _store[i+1].y();
-        i++;
+void CDriver::catchPack(CPack& p) {
+    p.setState();
+    _packHolding.push_back(p);
+}
+
+int CDriver::dist2Target(CTarget c) {
+    int result;
+    CPos dStart = start();
+    CPos dEnd = end();
+    CPos cStart = c.start();
+    CPos cEnd = c.end();
+
+    if (dStart._x == dEnd._x) { // the driver's road is horizontal
+        if (cStart._x == cEnd._x) { // the store's road is horizontal
+            if (cStart._y == dStart._y) { // on the same column
+                result = abs(cStart._x - dStart._x) + min(_dist + c.dist(), 2 * (cEnd._y - cStart._y) - _dist - c.dist());
+            }
+            else {
+                result = abs(cStart._x - dStart._x) + abs(cStart._y + c.dist() - dStart._y - _dist);
+            }
+        }
+        else { // the store's road is vertical
+            result = abs(cStart._x + c.dist() - dStart._x) + abs(cStart._y - dStart._y - _dist);
+        }
     }
+    else { // the driver's road is vertical
+        if (cStart._y == cEnd._y) { //the store's road is vertical
+            if (cStart._x == dStart._x) { // on the same row
+                result = abs(cStart._y - dStart._y) + min(_dist + c.dist(), 2 * (cEnd._x - cStart._x) - _dist - c.dist());
+            }
+            else {
+                result = abs(cStart._y - dStart._y) + abs(cStart._x + c.dist() - dStart._x - _dist);
+            }
+        }
+        else {
+            result = abs(cStart._y + c.dist() - dStart._y) + abs(cStart._x - dStart._x - _dist);
+        }
+    }
+    return result;
 }

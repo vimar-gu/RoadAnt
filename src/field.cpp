@@ -41,10 +41,10 @@ void Field::paintDriver(const QColor &color, qreal x, qreal y) {
 }
 
 void Field::fillField() {
-    for (int i = 0; i < City::instance()->storeNum(); i++) {
-        paintStore(COLOR_PINK, City::instance()->store(i).x(), City::instance()->store(i).y());
-    }
-    for (int i = 0; i < City::instance()->driverNum(); i++) {
-        paintDriver(COLOR_ORANGE, City::instance()->driver(i).x(), City::instance()->driver(i).y());
-    }
+//    for (int i = 0; i < City::instance()->storeNum(); i++) {
+//        paintStore(COLOR_PINK, City::instance()->store(i).x(), City::instance()->store(i).y());
+//    }
+//    for (int i = 0; i < City::instance()->driverNum(); i++) {
+//        paintDriver(COLOR_ORANGE, City::instance()->driver(i).x(), City::instance()->driver(i).y());
+//    }
 }

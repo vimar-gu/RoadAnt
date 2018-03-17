@@ -8,7 +8,8 @@ SOURCES += \
     src/interaction.cpp \
     src/field.cpp \
     src/ant.cpp \
-    src/city.cpp
+    src/city.cpp \
+    src/utils.cpp
 
 RESOURCES += qml.qrc
 
@@ -39,4 +40,5 @@ HEADERS += \
     src/field.h \
     src/ant.h \
     src/city.h \
-    src/singleton.hpp
+    src/singleton.hpp \
+    src/utils.h
