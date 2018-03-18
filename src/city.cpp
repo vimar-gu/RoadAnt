@@ -1,6 +1,7 @@
 #include <QDebug>
 #include "city.h"
 #include "utils.h"
+#include "ant.h"
 #include <math.h>
 #include <sys/time.h>
 #include <iostream>
@@ -12,6 +13,12 @@
 using namespace std;
 QString ROAD_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/roadData.txt";
 QString STORE_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/storeData.txt";
+
+namespace {
+    double smallRangeDensity = 1;
+    double midRangeDensity = 5;
+    double transRangeDensity = 10;
+}
 
 CCity::CCity()
 {
@@ -72,6 +79,21 @@ void CCity::generatePack() {
     CTarget t(road, d);
     CPack p(s, t);
     _packWaiting.push_back(p);
+}
+
+void CCity::calcVel(CDriver& d, vector<CPack> packList) {
+    Ant ant(10, 1);
+    ant.dealwithData(d, packList);
+}
+
+vector<CPack> CCity::setPackList(CDriver &d) {
+    vector<CPack> packList;
+    return packList;
+}
+
+double CCity::calcDensity(CDriver &d) {
+    double density;
+    return density;
 }
 
 void CCity::fresh() {

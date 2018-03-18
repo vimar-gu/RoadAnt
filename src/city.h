@@ -4,7 +4,6 @@
 #include <QObject>
 #include <vector>
 #include "singleton.hpp"
-#include "ant.h"
 using namespace std;
 
 struct CPos {
@@ -61,12 +60,14 @@ private:
 class CDriver : public CRoad {
 public:
     CDriver() {}
-    CDriver(CRoad road, double dist) : CRoad(road), _dist(dist) {}
+    CDriver(CRoad road, double dist) : CRoad(road), _dist(dist), _vel(0) {}
     int dist2Target(CTarget c);
     const int& dist() {return _dist;}
     void catchPack(CPack& p);
+    void setVel(int vel) {_vel = vel;}
 private:
     int _dist; // from the start end
+    int _vel;
     vector<CPack> _packHolding;
 };
 
@@ -76,6 +77,9 @@ public:
     CCity();
     void start();
     void generatePack();
+    void calcVel(CDriver& d, vector<CPack> packList);
+    vector<CPack> setPackList(CDriver& d);
+    double calcDensity(CDriver& d);
 signals:
     void needDraw();
 public slots:
