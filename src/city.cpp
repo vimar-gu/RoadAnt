@@ -15,9 +15,8 @@ QString ROAD_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/road
 QString STORE_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/storeData.txt";
 
 namespace {
-    double smallRangeDensity = 1;
+    double smallRangeDensity = 2;
     double midRangeDensity = 5;
-    double transRangeDensity = 10;
 }
 
 CCity::CCity()
@@ -88,11 +87,28 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
 
 vector<CPack> CCity::setPackList(CDriver &d) {
     vector<CPack> packList;
+    int density = calcDensity(d);
+    if (density <= smallRangeDensity) {
+
+    }
+    else if (density <= midRangeDensity) {
+
+    }
+    else { // need to change working range
+
+    }
     return packList;
 }
 
-double CCity::calcDensity(CDriver &d) {
-    double density;
+int CCity::calcDensity(CDriver &d) {
+    CPos start = d.start();
+    CPos end = d.end();
+    int density;
+
+    for (auto& elem : _driverList) {
+        if (elem.start() == start || elem.end() == start || elem.start() == end || elem.end() == end) density++;
+    }
+
     return density;
 }
 
@@ -118,6 +134,20 @@ void CCity::fresh() {
 //        _storeNum--;
 //        _driver[tmpCnt].tempPos = finalDicision > _driver[tmpCnt].tempPos ? finalDicision - 1 : finalDicision;
 //    }
+}
+
+CPos CTarget::pos() {
+    CPos pos;
+    if (start()._x == end()._x) pos = CPos(start()._x, start()._y + _dist);
+    else pos = CPos(start()._x + _dist, start()._y);
+    return pos;
+}
+
+CPos CDriver::pos() {
+    CPos pos;
+    if (start()._x == end()._x) pos = CPos(start()._x, start()._y + _dist);
+    else pos = CPos(start()._x + _dist, start()._y);
+    return pos;
 }
 
 void CDriver::catchPack(CPack& p) {

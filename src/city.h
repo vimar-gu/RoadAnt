@@ -36,6 +36,7 @@ public:
     CTarget() {}
     CTarget(CRoad road, int dist) : CRoad(road), _dist(dist) {}
     const int& dist() const {return _dist;}
+    CPos pos();
 private:
     int _dist;
 };
@@ -63,6 +64,7 @@ public:
     CDriver(CRoad road, double dist) : CRoad(road), _dist(dist), _vel(0) {}
     int dist2Target(CTarget c);
     const int& dist() {return _dist;}
+    CPos pos();
     void catchPack(CPack& p);
     void setVel(int vel) {_vel = vel;}
 private:
@@ -79,7 +81,13 @@ public:
     void generatePack();
     void calcVel(CDriver& d, vector<CPack> packList);
     vector<CPack> setPackList(CDriver& d);
-    double calcDensity(CDriver& d);
+    int calcDensity(CDriver& d);
+    int roadNum() {return _roadNum;}
+    int storeNum() {return _storeNum;}
+    int driverNum() {return _driverNum;}
+    CRoad road(int i) {return _roadList.at(i);}
+    CDriver driver(int i) {return _driverList.at(i);}
+    CStore store(int i) {return _storeList.at(i);}
 signals:
     void needDraw();
 public slots:

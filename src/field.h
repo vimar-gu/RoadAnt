@@ -16,8 +16,9 @@ public slots:
     void draw();
 private:
     void initField();
-    void paintDriver(const QColor& color,qreal x,qreal y);
-    void paintStore(const QColor& color,qreal x,qreal y);
+    void paintRoad(const QColor& color, QPointF start, QPointF end);
+    void paintDriver(const QColor& color, qreal x, qreal y);
+    void paintStore(const QColor& color, qreal x, qreal y);
     void fillField();
     QPixmap *pixmap;
     QPainter pixmapPainter;
