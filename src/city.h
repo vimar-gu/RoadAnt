@@ -8,7 +8,16 @@ using namespace std;
 
 struct CPos {
     CPos() {}
-    CPos(int x, int y) :_x(x), _y(y) {}
+    CPos(int x, int y) : _x(x), _y(y) {}
+    int _x;
+    int _y;
+};
+
+struct CVel {
+    CVel() {}
+    CVel(int x, int y) : _x(x), _y(y) {}
+    bool isPositive() {return mod() > 0;}
+    int mod() const {return _x + _y;}
     int _x;
     int _y;
 };
@@ -24,6 +33,10 @@ public:
     const CPos end() const {return _end;}
     const int& level() {return _level;}
     const int& length() {return _length;}
+    bool onTheRoad(CPos pos) {return pos._x >= _start._x && pos._x <= _end._x && pos._y >= _start._y && pos._y <= _end._y;}
+    void setStart(CPos start) {_start = start;}
+    void setEnd(CPos end) {_end = end;}
+    void setLevel(int level) {_level = level;}
 private:
     CPos _start;
     CPos _end;
@@ -36,7 +49,7 @@ public:
     CTarget() {}
     CTarget(CRoad road, int dist) : CRoad(road), _dist(dist) {}
     const int& dist() const {return _dist;}
-    CPos pos();
+    CPos pos() const;
 private:
     int _dist;
 };
@@ -61,15 +74,18 @@ private:
 class CDriver : public CRoad {
 public:
     CDriver() {}
-    CDriver(CRoad road, double dist) : CRoad(road), _dist(dist), _vel(0) {}
+    CDriver(CRoad road, double dist) : CRoad(road), _dist(dist), _vel(CVel(0, 0)) {}
     int dist2Target(CTarget c);
     const int& dist() {return _dist;}
-    CPos pos();
+    void setDist(int dist) {_dist = dist;}
+    CPos pos() const;
     void catchPack(CPack& p);
-    void setVel(int vel) {_vel = vel;}
+    void setVel(CVel vel) {_vel = vel;}
+    const CVel& vel() const {return _vel;}
+    void changeRoad(CRoad road) {setStart(road.start()); setEnd(road.end()); setLevel(road.level());}
 private:
     int _dist; // from the start end
-    int _vel;
+    CVel _vel;
     vector<CPack> _packHolding;
 };
 
@@ -80,6 +96,7 @@ public:
     void start();
     void generatePack();
     void calcVel(CDriver& d, vector<CPack> packList);
+    void applyVel(CDriver& d);
     vector<CPack> setPackList(CDriver& d);
     int calcDensity(CDriver& d);
     int roadNum() {return _roadNum;}

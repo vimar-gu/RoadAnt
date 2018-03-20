@@ -85,6 +85,19 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     ant.dealwithData(d, packList);
 }
 
+void CCity::applyVel(CDriver& d) {
+    if (d.pos() == d.start() || d.pos() == d.end()) {
+        if (d.vel()._x > 0) {
+            auto r = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r)
+            {return r.start() == d.pos() && r.end()._x > r.start()._x;});
+            d.changeRoad(*r);
+        }
+    }
+    else {
+        d.setDist(d.dist() + d.vel().mod());
+    }
+}
+
 vector<CPack> CCity::setPackList(CDriver &d) {
     vector<CPack> packList;
     int density = calcDensity(d);
@@ -115,35 +128,22 @@ int CCity::calcDensity(CDriver &d) {
 void CCity::fresh() {
     emit needDraw();
 
-//    for (int tmpCnt = 0; tmpCnt < _driverNum; tmpCnt++) {
-//        Ant tempAnt(100, 1);
-//        vector<int> tmp = tempAnt.dealWithData();
-
-//        int i = 0;
-//        while (tmp[i] != _driver[tmpCnt].tempPos) i++;
-//        int front = i == 0 ? tmp[_storeNum - 1] : tmp[i-1];
-//        int next = i == _storeNum - 1 ? tmp[0] : tmp[i+1];
-//        double frontDis = store2StoreDis(_driver[tmpCnt].tempPos, front);
-//        double nextDis = store2StoreDis(_driver[tmpCnt].tempPos, next);
-//        int finalDicision = frontDis > nextDis ? next : front;
-
-//        _driver[tmpCnt]._pos._x = _store[finalDicision].x();
-//        _driver[tmpCnt]._pos._y = _store[finalDicision].y();
-//        qDebug() << _driver[tmpCnt].tempPos;
-//        clearStore(_driver[tmpCnt].tempPos);
-//        _storeNum--;
-//        _driver[tmpCnt].tempPos = finalDicision > _driver[tmpCnt].tempPos ? finalDicision - 1 : finalDicision;
-//    }
+    for (int i = 0; i < _driverNum - 1; i++) {
+        auto& d = _driverList.at(i);
+        vector<CPack> packs = setPackList(d);
+        calcVel(d, packs);
+        applyVel(d);
+    }
 }
 
-CPos CTarget::pos() {
+CPos CTarget::pos() const {
     CPos pos;
     if (start()._x == end()._x) pos = CPos(start()._x, start()._y + _dist);
     else pos = CPos(start()._x + _dist, start()._y);
     return pos;
 }
 
-CPos CDriver::pos() {
+CPos CDriver::pos() const {
     CPos pos;
     if (start()._x == end()._x) pos = CPos(start()._x, start()._y + _dist);
     else pos = CPos(start()._x + _dist, start()._y);

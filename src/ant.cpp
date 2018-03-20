@@ -15,7 +15,7 @@ void Ant::dealwithData(CDriver& d, vector<CPack> packList) {
     vector<vector<int>> randPosList;
     randList(randPosList);
 
-    int vel;
+    CVel vel;
     d.setVel(vel);
 }
 

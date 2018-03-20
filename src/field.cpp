@@ -28,7 +28,7 @@ void Field::paint(QPainter* painter){
 
 void Field::paintRoad(const QColor &color, QPointF start, QPointF end) {
     pixmapPainter.setBrush(QBrush(color));
-    pixmapPainter.setPen(Qt::NoPen);
+    pixmapPainter.setPen(QPen(COLOR_ORANGE, 4));
     pixmapPainter.drawLine(start, end);
 }
 
@@ -47,17 +47,17 @@ void Field::paintDriver(const QColor &color, qreal x, qreal y) {
 }
 
 void Field::fillField() {
-    for (int i = 0; i < City::instance()->roadNum(); i++) {
+    for (int i = 0; i < City::instance()->roadNum() - 1; i++) {
         CPos start = City::instance()->road(i).start();
         CPos end = City::instance()->road(i).end();
         QPointF qstart(start._x, start._y);
         QPointF qend(end._x, end._y);
         paintRoad(COLOR_ORANGE, qstart, qend);
     }
-    for (int i = 0; i < City::instance()->driverNum(); i++) {
-        paintDriver(COLOR_BLUE, City::instance()->driver(i).pos()._x, City::instance()->driver(i).pos()._y);
+    for (int i = 0; i < City::instance()->driverNum() - 1; i++) {
+        paintDriver(COLOR_PINK, City::instance()->driver(i).pos()._x, City::instance()->driver(i).pos()._y);
     }
-    for (int i = 0; i < City::instance()->storeNum(); i++) {
+    for (int i = 0; i < City::instance()->storeNum() - 1; i++) {
         paintStore(COLOR_YELLOW, City::instance()->store(i).pos()._x, City::instance()->store(i).pos()._y);
     }
 }
