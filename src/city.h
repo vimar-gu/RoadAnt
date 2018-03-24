@@ -59,16 +59,20 @@ class CPack {
 public:
     CPack() {}
     CPack(CTarget source, CTarget destination) : _source(source), _destination(destination), _state(0) {}
-    const CTarget source() {return _source;}
-    const CTarget destination() {return _destination;}
-    const int& reward() {return _reward;}
-    const int& state() {return _state;}
-    void setState() {_state = 1;}
+    const CTarget source() const {return _source;}
+    const CTarget destination() const {return _destination;}
+    const int& reward() const {return _reward;}
+    const int& state() const {return _state;}
+    const int& limit() const {return _timeLimit;}
+    void setStateWait() {_state = 0;}
+    void setStatePick() {_state = 1;}
+    void setStateHold() {_state = 2;}
 private:
     CTarget _source;
     CTarget _destination;
     int _reward;
-    int _state;
+    int _timeLimit;
+    int _state; // 0 for waiting, 1 for picking, 2 for holding
 };
 
 class CDriver : public CRoad {
@@ -80,6 +84,11 @@ public:
     void setDist(int dist) {_dist = dist;}
     CPos pos() const;
     void catchPack(CPack& p);
+    void pickPack(CPack& p);
+    bool isPicking() {return !_packPicking.empty();}
+    bool isHolding() {return !_packHolding.empty();}
+    void checkHold();
+    void checkDrop();
     void setVel(CVel vel) {_vel = vel;}
     const CVel& vel() const {return _vel;}
     void changeRoad(CRoad road) {setStart(road.start()); setEnd(road.end()); setLevel(road.level());}
@@ -87,6 +96,7 @@ private:
     int _dist; // from the start end
     CVel _vel;
     vector<CPack> _packHolding;
+    vector<CPack> _packPicking;
 };
 
 class CCity : public QObject {

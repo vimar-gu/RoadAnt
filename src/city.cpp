@@ -82,7 +82,15 @@ void CCity::generatePack() {
 
 void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     Ant ant(10, 1);
-    ant.dealwithData(d, packList);
+    vector<CPack> targetPackList = ant.dealwithData(d, packList);
+    for (auto& elem : targetPackList) {
+        if (elem.state() == 0) {
+            CPack picking = elem;
+            d.pickPack(picking);
+            auto pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p){return p == elem;});
+            _packWaiting.erase(pos);
+        }
+    }
 }
 
 void CCity::applyVel(CDriver& d) {
@@ -95,6 +103,12 @@ void CCity::applyVel(CDriver& d) {
     }
     else {
         d.setDist(d.dist() + d.vel().mod());
+    }
+    if (d.isPicking()) {
+        d.checkHold();
+    }
+    if (d.isHolding()) {
+        d.checkDrop();
     }
 }
 
@@ -150,9 +164,30 @@ CPos CDriver::pos() const {
     return pos;
 }
 
+void CDriver::pickPack(CPack &p) {
+    p.setStatePick();
+    _packPicking.push_back(p);
+}
+
 void CDriver::catchPack(CPack& p) {
-    p.setState();
+    p.setStateHold();
     _packHolding.push_back(p);
+}
+
+void CDriver::checkHold() {
+    for (auto& elem : _packPicking) {
+        if (pos() == elem.source().pos()) {
+            CPack holding = elem;
+            _packHolding.push_back(holding);
+            auto elempos = find_if(_packPicking.begin(), _packPicking.end(), [=](CPack p){return p.source().pos() == pos();});
+            _packPicking.erase(elempos);
+        }
+    }
+}
+
+void CDriver::checkDrop() {
+    auto elempos = find_if(_packHolding.begin(), _packHolding.end(), [=](CPack p){return p.destination().pos() == pos();});
+    if (elempos != _packHolding.end()) _packHolding.erase(elempos);
 }
 
 int CDriver::dist2Target(CTarget c) {

@@ -10,9 +10,12 @@ class Ant
 public:
     Ant(int antNum, int loopNum) : _maxLoop(loopNum), _antNum(antNum) {}
     ~Ant() {}
-    void dealwithData(CDriver& d, vector<CPack> packList);
-    void randList(vector<vector<int>> list);
+    bool isOrigin() {return _isOrigin;}
+    vector<CPack> dealwithData(CDriver& d, vector<CPack> packList);
+    void randOrigin(vector<vector<int>>& list, vector<CPack> packList);
+    void randList(vector<vector<int>>& list, vector<CPack> packList);
 private:
+    bool _isOrigin = 0;
     int _maxLoop;
     int _antNum;
     int _driverNum;
