@@ -82,15 +82,9 @@ void CCity::generatePack() {
 
 void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     Ant ant(10, 1);
-    vector<CPack> targetPackList = ant.dealwithData(d, packList);
-    for (auto& elem : targetPackList) {
-        if (elem.state() == 0) {
-            CPack picking = elem;
-            d.pickPack(picking);
-            auto pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p){return p == elem;});
-            _packWaiting.erase(pos);
-        }
-    }
+    CTarget nextTatget = ant.dealwithData(d, packList);
+    CVel vel;
+    d.setVel(vel);
 }
 
 void CCity::applyVel(CDriver& d) {
@@ -188,40 +182,4 @@ void CDriver::checkHold() {
 void CDriver::checkDrop() {
     auto elempos = find_if(_packHolding.begin(), _packHolding.end(), [=](CPack p){return p.destination().pos() == pos();});
     if (elempos != _packHolding.end()) _packHolding.erase(elempos);
-}
-
-int CDriver::dist2Target(CTarget c) {
-    int result;
-    CPos dStart = start();
-    CPos dEnd = end();
-    CPos cStart = c.start();
-    CPos cEnd = c.end();
-
-    if (dStart._x == dEnd._x) { // the driver's road is horizontal
-        if (cStart._x == cEnd._x) { // the store's road is horizontal
-            if (cStart._y == dStart._y) { // on the same column
-                result = abs(cStart._x - dStart._x) + min(_dist + c.dist(), 2 * (cEnd._y - cStart._y) - _dist - c.dist());
-            }
-            else {
-                result = abs(cStart._x - dStart._x) + abs(cStart._y + c.dist() - dStart._y - _dist);
-            }
-        }
-        else { // the store's road is vertical
-            result = abs(cStart._x + c.dist() - dStart._x) + abs(cStart._y - dStart._y - _dist);
-        }
-    }
-    else { // the driver's road is vertical
-        if (cStart._y == cEnd._y) { //the store's road is vertical
-            if (cStart._x == dStart._x) { // on the same row
-                result = abs(cStart._y - dStart._y) + min(_dist + c.dist(), 2 * (cEnd._x - cStart._x) - _dist - c.dist());
-            }
-            else {
-                result = abs(cStart._y - dStart._y) + abs(cStart._x + c.dist() - dStart._x - _dist);
-            }
-        }
-        else {
-            result = abs(cStart._y + c.dist() - dStart._y) + abs(cStart._x - dStart._x - _dist);
-        }
-    }
-    return result;
 }

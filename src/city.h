@@ -79,7 +79,6 @@ class CDriver : public CRoad {
 public:
     CDriver() {}
     CDriver(CRoad road, double dist) : CRoad(road), _dist(dist), _vel(CVel(0, 0)) {}
-    int dist2Target(CTarget c);
     const int& dist() {return _dist;}
     void setDist(int dist) {_dist = dist;}
     CPos pos() const;
@@ -89,6 +88,8 @@ public:
     bool isHolding() {return !_packHolding.empty();}
     void checkHold();
     void checkDrop();
+    vector<CPack> holdingPacks() {return _packHolding;}
+    vector<CPack> pickingPacks() {return _packPicking;}
     void setVel(CVel vel) {_vel = vel;}
     const CVel& vel() const {return _vel;}
     void changeRoad(CRoad road) {setStart(road.start()); setEnd(road.end()); setLevel(road.level());}

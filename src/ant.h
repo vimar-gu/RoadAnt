@@ -11,9 +11,9 @@ public:
     Ant(int antNum, int loopNum) : _maxLoop(loopNum), _antNum(antNum) {}
     ~Ant() {}
     bool isOrigin() {return _isOrigin;}
-    vector<CPack> dealwithData(CDriver& d, vector<CPack> packList);
-    void randOrigin(vector<vector<int>>& list, vector<CPack> packList);
+    CTarget dealwithData(CDriver& d, vector<CPack> packList);
     void randList(vector<vector<int>>& list, vector<CPack> packList);
+    vector<CTarget> dealwithHolding(CDriver& d, vector<CTarget> allTargetList);
 private:
     bool _isOrigin = 0;
     int _maxLoop;
@@ -21,6 +21,7 @@ private:
     int _driverNum;
     int _routeNum;
     int _targetNum;
+    int _totalTime;
     double _enFactor = 0.5;
     double _deFactor = 0.5;
     vector<double> _routeTau;

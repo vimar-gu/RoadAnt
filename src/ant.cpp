@@ -1,33 +1,77 @@
 #include "ant.h"
+#include <algorithm>
+#include "utils.h"
 
-vector<CPack> Ant::dealwithData(CDriver& d, vector<CPack> packList) {
+CTarget Ant::dealwithData(CDriver& d, vector<CPack> packList) {
     vector<CPack> targetPackList;
 
-
-    _targetNum = packList.size();
-    int waitingNum = 0;
-    for (auto& elem : packList) {
-        if (elem.state() == 0) {
-            waitingNum++;
-        }
+    vector<CTarget> allTargetList;
+    for (auto& elem : d.pickingPacks()) {
+        allTargetList.push_back(elem.destination());
     }
-    _targetNum += waitingNum;
+    for (auto& elem : d.holdingPacks()) {
+        allTargetList.push_back(elem.source());
+        allTargetList.push_back(elem.destination());
+    }
+
+    vector<CTarget> targetList = dealwithHolding(d, allTargetList);
+    CTarget nextTarget;
+
+    return nextTarget;
+}
+
+vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CTarget> allTargetList) {
+    vector<vector<CTarget>> routeRec;
+    vector<CTarget> bestRec;
+    vector<double> costRec;
+    double minCost = 10000;
+    routeRec.resize(_antNum);
+    _targetNum = allTargetList.size();
     _routeNum = _targetNum * (_targetNum - 1) / 2;
     _routeTau.resize(_routeNum);
 
-    vector<vector<int>> randPosList;
-    randPosList.resize(_antNum);
-    if (_isOrigin) {
-        randOrigin(randPosList, packList);
-        _isOrigin = 1;
+    for (int cnt = 0; cnt < _maxLoop; cnt++) {
+
+        for (auto& elem : routeRec) {
+            elem.clear();
+        }
+        routeRec.clear();
+
+        for (int i = 0; i < _antNum; i++) {
+            vector<CTarget> targetList;
+            CRoad driverRoad(d.start(), d.end(), d.level());
+            CTarget driverTarget(driverRoad, d.dist());
+            targetList.push_back(driverTarget);
+
+            while (targetList.size() < _targetNum + 1) {
+                int minDist = 10000;
+                CTarget nextTarget;
+                for (auto& elem : allTargetList) {
+                    CTarget lastTarget = targetList.back();
+                    if (distBetween(lastTarget, elem) < minDist) { // waited to be modified
+                        minDist = distBetween(lastTarget, elem);
+                        nextTarget = elem;
+                    }
+                }
+                auto pos = find_if(allTargetList.begin(), allTargetList.end(), [=](CTarget t){return t == nextTarget;});
+                allTargetList.erase(pos);
+            }
+
+            double cost = calcCost(targetList);
+            costRec.push_back(cost);
+            routeRec.push_back(targetList);
+        }
+
+        for (int elem = 0; elem < _antNum; elem++) {
+            if (costRec.at(elem) < minCost) {
+                minCost = costRec.at(elem);
+                bestRec = routeRec.at(elem);
+            }
+        }
     }
-    else randList(randPosList, packList);
-
-
-    return targetPackList;
 }
 
-void Ant::randOrigin(vector<vector<int>>& list, vector<CPack> packList) {
+void Ant::randList(vector<vector<int>>& list, vector<CPack> packList) {
     vector<CTarget> targetList;
     targetList.resize(_targetNum);
 
@@ -36,15 +80,6 @@ void Ant::randOrigin(vector<vector<int>>& list, vector<CPack> packList) {
         targetList.push_back(elem.destination());
     }
     for (int i = 0; i < _antNum; i++) {
-        int tmp = rand() % packList.size();
-        CPack tmpPack = packList.at(tmp);
-        if (tmpPack.state() == 1) {
-//            targetList.push_back(tmpPack);
-//            packList.erase()
-        }
+
     }
-}
-
-void Ant::randList(vector<vector<int>>& list, vector<CPack> packList) {
-
 }

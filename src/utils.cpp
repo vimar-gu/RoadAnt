@@ -12,3 +12,49 @@ bool operator ==(const CTarget s1, const CTarget s2) {
 bool operator ==(const CPack& p1, const CPack p2) {
     return p1.source() == p2.source() && p1.destination() == p2.destination() && p1.reward() == p2.reward();
 }
+
+int distBetween(CTarget d, CTarget c) {
+    int result;
+    CPos dStart = d.start();
+    CPos dEnd = d.end();
+    CPos cStart = c.start();
+    CPos cEnd = c.end();
+
+    if (dStart._x == dEnd._x) { // the driver's road is horizontal
+        if (cStart._x == cEnd._x) { // the store's road is horizontal
+            if (cStart._y == dStart._y) { // on the same column
+                result = abs(cStart._x - dStart._x) + min(d.dist() + c.dist(), 2 * (cEnd._y - cStart._y) - d.dist() - c.dist());
+            }
+            else {
+                result = abs(cStart._x - dStart._x) + abs(cStart._y + c.dist() - dStart._y - d.dist());
+            }
+        }
+        else { // the store's road is vertical
+            result = abs(cStart._x + c.dist() - dStart._x) + abs(cStart._y - dStart._y - d.dist());
+        }
+    }
+    else { // the driver's road is vertical
+        if (cStart._y == cEnd._y) { //the store's road is vertical
+            if (cStart._x == dStart._x) { // on the same row
+                result = abs(cStart._y - dStart._y) + min(d.dist() + c.dist(), 2 * (cEnd._x - cStart._x) - d.dist() - c.dist());
+            }
+            else {
+                result = abs(cStart._y - dStart._y) + abs(cStart._x + c.dist() - dStart._x - d.dist());
+            }
+        }
+        else {
+            result = abs(cStart._y + c.dist() - dStart._y) + abs(cStart._x - dStart._x - d.dist());
+        }
+    }
+    return result;
+}
+
+int distBetween(CDriver d, CTarget c) {
+    CRoad tmpRoad(d.start(), d.end(), d.level());
+    CTarget tmpTarget(tmpRoad, d.dist());
+    return distBetween(tmpTarget, c);
+}
+
+double calcCost(vector<CTarget> targetList) {
+    return 0;
+}
