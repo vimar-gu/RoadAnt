@@ -1,21 +1,25 @@
 #include "ant.h"
 #include <algorithm>
 #include "utils.h"
+#include <QDebug>
 
 CTarget Ant::dealwithData(CDriver& d, vector<CPack> packList) {
     vector<CPack> targetPackList;
 
     vector<CTarget> allTargetList;
     for (auto& elem : d.pickingPacks()) {
+        qDebug() << "pick";
         allTargetList.push_back(elem.destination());
     }
     for (auto& elem : d.holdingPacks()) {
+        qDebug() << "hold";
         allTargetList.push_back(elem.source());
         allTargetList.push_back(elem.destination());
     }
-
     vector<CTarget> targetList = dealwithHolding(d, allTargetList);
-    CTarget nextTarget;
+
+    CTarget nextTarget = targetList.front();
+    qDebug() << nextTarget.pos()._x << nextTarget.pos()._y;
 
     return nextTarget;
 }
@@ -69,6 +73,7 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CTarget> allTargetList) 
             }
         }
     }
+    return bestRec;
 }
 
 void Ant::randList(vector<vector<int>>& list, vector<CPack> packList) {

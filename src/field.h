@@ -19,6 +19,7 @@ private:
     void paintRoad(const QColor& color, QPointF start, QPointF end);
     void paintDriver(const QColor& color, qreal x, qreal y);
     void paintStore(const QColor& color, qreal x, qreal y);
+    void paintPack(const QColor& color, qreal x, qreal y);
     void fillField();
     QPixmap *pixmap;
     QPainter pixmapPainter;

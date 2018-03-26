@@ -52,6 +52,10 @@ CCity::CCity()
         _storeList.push_back(s);
     }
 
+    CRoad tmpRoad = _roadList.front();
+    CDriver driver(tmpRoad, 4);
+    _driverList.push_back(driver);
+    _driverNum = 1;
     _roadNum = _roadList.size();
     _storeNum = _storeList.size();
     roadData.close();
@@ -65,14 +69,15 @@ void CCity::start() {
 }
 
 void CCity::generatePack() {
-    int r = rand() % _storeNum;
+    int r = rand() % (_storeNum - 1);
     CStore s = _storeList.at(r);
-    auto pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p) {return p.source() == s;});
-    while (pos == _packWaiting.end()) {
+    auto pos = find_if(_packWaiting.begin(), _packWaiting.end()--, [=](CPack p) {return p.source() == s;});
+    if (pos == _packWaiting.end()) {
         r = rand() % _storeNum;
         s = _storeList.at(r);
-        pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p) {return p.source() == s;});
+        pos = find_if(_packWaiting.begin(), _packWaiting.end()--, [=](CPack p) {return p.source() == s;});
     }
+    else return;
     CRoad road = _roadList.at(r);
     int d = rand() % road.length();
     CTarget t(road, d);
@@ -82,8 +87,16 @@ void CCity::generatePack() {
 
 void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     Ant ant(10, 1);
-    CTarget nextTatget = ant.dealwithData(d, packList);
+    CTarget nextTarget = ant.dealwithData(d, packList);
     CVel vel;
+    if (isOntheRight(d, nextTarget)) {
+        if (d.start()._x == d.end()._x) vel = CVel(d.level(), 0);
+        else vel = CVel(0, d.level());
+    }
+    else {
+        if (d.start()._x == d.end()._x) vel = CVel(-d.level(), 0);
+        else vel = CVel(0, -d.level());
+    }
     d.setVel(vel);
 }
 
@@ -94,8 +107,25 @@ void CCity::applyVel(CDriver& d) {
             {return r.start() == d.pos() && r.end()._x > r.start()._x;});
             d.changeRoad(*r);
         }
+        else if (d.vel()._x < 0) {
+            auto r = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r)
+            {return r.end() == d.pos() && r.end()._x > r.start()._x;});
+            d.changeRoad(*r);
+        }
+        else if (d.vel()._y > 0) {
+            auto r = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r)
+            {return r.start() == d.pos() && r.end()._y > r.start()._y;});
+            d.changeRoad(*r);
+        }
+        else if (d.vel()._y < 0) {
+            auto r = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r)
+            {return r.end() == d.pos() && r.end()._y > r.start()._y;});
+            qDebug() << d.vel()._x << d.vel()._y << (*r).start()._x;
+            d.changeRoad(*r);
+        }
     }
     else {
+        qDebug() << "here" << d.vel().mod();
         d.setDist(d.dist() + d.vel().mod());
     }
     if (d.isPicking()) {
@@ -118,6 +148,9 @@ vector<CPack> CCity::setPackList(CDriver &d) {
     else { // need to change working range
 
     }
+    for (auto elem : _packWaiting) {
+        packList.push_back(elem);
+    }
     return packList;
 }
 
@@ -125,18 +158,17 @@ int CCity::calcDensity(CDriver &d) {
     CPos start = d.start();
     CPos end = d.end();
     int density;
-
     for (auto& elem : _driverList) {
         if (elem.start() == start || elem.end() == start || elem.start() == end || elem.end() == end) density++;
     }
-
     return density;
 }
 
 void CCity::fresh() {
     emit needDraw();
 
-    for (int i = 0; i < _driverNum - 1; i++) {
+    generatePack();
+    for (int i = 0; i < _driverNum; i++) {
         auto& d = _driverList.at(i);
         vector<CPack> packs = setPackList(d);
         calcVel(d, packs);

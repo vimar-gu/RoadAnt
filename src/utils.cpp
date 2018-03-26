@@ -13,6 +13,21 @@ bool operator ==(const CPack& p1, const CPack p2) {
     return p1.source() == p2.source() && p1.destination() == p2.destination() && p1.reward() == p2.reward();
 }
 
+bool isOntheRight(const CDriver &d, const CTarget &t) { // whether target is on the right of driver
+    if (d.start()._x == d.end()._x) { // the driver's road is horizontal
+        if (t.start()._x == t.end()._x) {
+            return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
+        }
+        else return t.pos()._x > d.pos()._x;
+    }
+    else {
+        if (t.start()._y == t.end()._y) {
+            return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
+        }
+        else return t.pos()._y > d.pos()._y;
+    }
+}
+
 int distBetween(CTarget d, CTarget c) {
     int result;
     CPos dStart = d.start();

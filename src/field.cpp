@@ -32,6 +32,12 @@ void Field::paintRoad(const QColor &color, QPointF start, QPointF end) {
     pixmapPainter.drawLine(start, end);
 }
 
+void Field::paintPack(const QColor &color, qreal x, qreal y) {
+    pixmapPainter.setBrush(QBrush(Qt::NoBrush));
+    pixmapPainter.setPen(QPen(color));
+    pixmapPainter.drawText(x, y, QString::number(1));
+}
+
 void Field::paintStore(const QColor &color, qreal x, qreal y) {
     static float radius = 5;
     pixmapPainter.setBrush(QBrush(color));
@@ -54,10 +60,13 @@ void Field::fillField() {
         QPointF qend(end._x, end._y);
         paintRoad(COLOR_ORANGE, qstart, qend);
     }
-    for (int i = 0; i < City::instance()->driverNum() - 1; i++) {
+    for (int i = 0; i < City::instance()->driverNum(); i++) {
         paintDriver(COLOR_PINK, City::instance()->driver(i).pos()._x, City::instance()->driver(i).pos()._y);
     }
     for (int i = 0; i < City::instance()->storeNum() - 1; i++) {
         paintStore(COLOR_YELLOW, City::instance()->store(i).pos()._x, City::instance()->store(i).pos()._y);
+    }
+    for (int i = 0; i < City::instance()->packNum(); i++) {
+        paintPack(Qt::white, City::instance()->pack(i).source().pos()._x, City::instance()->pack(i).source().pos()._y);
     }
 }

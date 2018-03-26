@@ -31,8 +31,8 @@ public:
     }
     const CPos start() const {return _start;}
     const CPos end() const {return _end;}
-    const int& level() {return _level;}
-    const int& length() {return _length;}
+    const int& level() const {return _level;}
+    const int& length() const {return _length;}
     bool onTheRoad(CPos pos) {return pos._x >= _start._x && pos._x <= _end._x && pos._y >= _start._y && pos._y <= _end._y;}
     void setStart(CPos start) {_start = start;}
     void setEnd(CPos end) {_end = end;}
@@ -79,7 +79,7 @@ class CDriver : public CRoad {
 public:
     CDriver() {}
     CDriver(CRoad road, double dist) : CRoad(road), _dist(dist), _vel(CVel(0, 0)) {}
-    const int& dist() {return _dist;}
+    const int& dist() const {return _dist;}
     void setDist(int dist) {_dist = dist;}
     CPos pos() const;
     void catchPack(CPack& p);
@@ -113,9 +113,11 @@ public:
     int roadNum() {return _roadNum;}
     int storeNum() {return _storeNum;}
     int driverNum() {return _driverNum;}
+    int packNum() {return _packWaiting.size();}
     CRoad road(int i) {return _roadList.at(i);}
     CDriver driver(int i) {return _driverList.at(i);}
     CStore store(int i) {return _storeList.at(i);}
+    CPack pack(int i) {return _packWaiting.at(i);}
 signals:
     void needDraw();
 public slots:
