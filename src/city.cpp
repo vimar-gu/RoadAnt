@@ -53,7 +53,7 @@ CCity::CCity()
     }
 
     CRoad tmpRoad = _roadList.front();
-    CDriver driver(tmpRoad, 4);
+    CDriver driver(tmpRoad, 96);
     _driverList.push_back(driver);
     _driverNum = 1;
     _roadNum = _roadList.size();
@@ -120,12 +120,10 @@ void CCity::applyVel(CDriver& d) {
         else if (d.vel()._y < 0) {
             auto r = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r)
             {return r.end() == d.pos() && r.end()._y > r.start()._y;});
-            qDebug() << d.vel()._x << d.vel()._y << (*r).start()._x;
             d.changeRoad(*r);
         }
     }
     else {
-        qDebug() << "here" << d.vel().mod();
         d.setDist(d.dist() + d.vel().mod());
     }
     if (d.isPicking()) {
@@ -214,4 +212,12 @@ void CDriver::checkHold() {
 void CDriver::checkDrop() {
     auto elempos = find_if(_packHolding.begin(), _packHolding.end(), [=](CPack p){return p.destination().pos() == pos();});
     if (elempos != _packHolding.end()) _packHolding.erase(elempos);
+}
+
+void CDriver::changeRoad(CRoad road) {
+     setStart(road.start());
+     setEnd(road.end());
+     setLevel(road.level());
+     if (_vel.mod() > 0) setDist(1);
+     else setDist(road.length() - 1);
 }

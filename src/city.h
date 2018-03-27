@@ -92,7 +92,7 @@ public:
     vector<CPack> pickingPacks() {return _packPicking;}
     void setVel(CVel vel) {_vel = vel;}
     const CVel& vel() const {return _vel;}
-    void changeRoad(CRoad road) {setStart(road.start()); setEnd(road.end()); setLevel(road.level());}
+    void changeRoad(CRoad road);
 private:
     int _dist; // from the start end
     CVel _vel;

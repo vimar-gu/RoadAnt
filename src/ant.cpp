@@ -4,33 +4,35 @@
 #include <QDebug>
 
 CTarget Ant::dealwithData(CDriver& d, vector<CPack> packList) {
-    vector<CPack> targetPackList;
 
-    vector<CTarget> allTargetList;
+    vector<CTarget> driverList;
     for (auto& elem : d.pickingPacks()) {
         qDebug() << "pick";
-        allTargetList.push_back(elem.destination());
+        driverList.push_back(elem.destination());
     }
     for (auto& elem : d.holdingPacks()) {
         qDebug() << "hold";
-        allTargetList.push_back(elem.source());
-        allTargetList.push_back(elem.destination());
+        driverList.push_back(elem.source());
+        driverList.push_back(elem.destination());
     }
-    vector<CTarget> targetList = dealwithHolding(d, allTargetList);
+    vector<CTarget> targetList = dealwithHolding(d, driverList);
+    dealwithWaiting(d, targetList, packList);
 
-    CTarget nextTarget = targetList.front();
-    qDebug() << nextTarget.pos()._x << nextTarget.pos()._y;
+    CTarget nextTarget;
+    targetList.erase(targetList.begin());
+    if (!targetList.empty()) nextTarget = targetList.front();
+    else nextTarget = CTarget();
 
     return nextTarget;
 }
 
-vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CTarget> allTargetList) {
+vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CTarget> driverList) {
     vector<vector<CTarget>> routeRec;
     vector<CTarget> bestRec;
     vector<double> costRec;
     double minCost = 10000;
     routeRec.resize(_antNum);
-    _targetNum = allTargetList.size();
+    _targetNum = driverList.size();
     _routeNum = _targetNum * (_targetNum - 1) / 2;
     _routeTau.resize(_routeNum);
 
@@ -43,6 +45,7 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CTarget> allTargetList) 
 
         for (int i = 0; i < _antNum; i++) {
             vector<CTarget> targetList;
+            vector<CTarget> allTargetList = driverList;
             CRoad driverRoad(d.start(), d.end(), d.level());
             CTarget driverTarget(driverRoad, d.dist());
             targetList.push_back(driverTarget);
@@ -76,15 +79,9 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CTarget> allTargetList) 
     return bestRec;
 }
 
-void Ant::randList(vector<vector<int>>& list, vector<CPack> packList) {
-    vector<CTarget> targetList;
-    targetList.resize(_targetNum);
-
+void Ant::dealwithWaiting(CDriver &d, vector<CTarget> &targetList, vector<CPack> packList) {
     for (auto& elem : packList) {
-        if (elem.state() == 0) targetList.push_back(elem.source());
+        targetList.push_back(elem.source());
         targetList.push_back(elem.destination());
-    }
-    for (int i = 0; i < _antNum; i++) {
-
     }
 }

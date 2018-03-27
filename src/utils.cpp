@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <iostream>
+#include <QDebug>
 using namespace std;
 
 bool operator ==(const CPos p1, const CPos p2) {
@@ -14,15 +15,17 @@ bool operator ==(const CPack& p1, const CPack p2) {
 }
 
 bool isOntheRight(const CDriver &d, const CTarget &t) { // whether target is on the right of driver
-    if (d.start()._x == d.end()._x) { // the driver's road is horizontal
+    if (d.start()._x == d.end()._x) { // the driver's road is vertical
         if (t.start()._x == t.end()._x) {
-            return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
+            if (t.start()._x == d.start()._x) return t.pos()._y > d.pos()._y;
+            else return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
         }
         else return t.pos()._x > d.pos()._x;
     }
     else {
         if (t.start()._y == t.end()._y) {
-            return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
+            if (t.start()._y == d.start()._y) return t.pos()._x > d.pos()._x;
+            else return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
         }
         else return t.pos()._y > d.pos()._y;
     }
@@ -35,30 +38,20 @@ int distBetween(CTarget d, CTarget c) {
     CPos cStart = c.start();
     CPos cEnd = c.end();
 
-    if (dStart._x == dEnd._x) { // the driver's road is horizontal
-        if (cStart._x == cEnd._x) { // the store's road is horizontal
-            if (cStart._y == dStart._y) { // on the same column
-                result = abs(cStart._x - dStart._x) + min(d.dist() + c.dist(), 2 * (cEnd._y - cStart._y) - d.dist() - c.dist());
-            }
-            else {
-                result = abs(cStart._x - dStart._x) + abs(cStart._y + c.dist() - dStart._y - d.dist());
-            }
+    if (dStart._x == dEnd._x) { // the driver's road is vertical
+        if (cStart._x == cEnd._x && cStart._x != dStart._x) { // the store's road is vertical
+                result = min(c.length() - c.dist() + d.length() - d.dist(), c.dist() + d.dist());
         }
-        else { // the store's road is vertical
-            result = abs(cStart._x + c.dist() - dStart._x) + abs(cStart._y - dStart._y - d.dist());
+        else { // the store's road is horizontal
+            result = abs(d.pos()._x - c.pos()._x) + abs(d.pos()._y - c.pos()._y);
         }
     }
-    else { // the driver's road is vertical
-        if (cStart._y == cEnd._y) { //the store's road is vertical
-            if (cStart._x == dStart._x) { // on the same row
-                result = abs(cStart._y - dStart._y) + min(d.dist() + c.dist(), 2 * (cEnd._x - cStart._x) - d.dist() - c.dist());
-            }
-            else {
-                result = abs(cStart._y - dStart._y) + abs(cStart._x + c.dist() - dStart._x - d.dist());
-            }
+    else { // the driver's road is horizontal
+        if (cStart._y == cEnd._y && cStart._y != dStart._y) { //the store's road is horizontal
+                result = min(c.length() - c.dist() + d.length() - d.dist(), c.dist() + d.dist());
         }
         else {
-            result = abs(cStart._y + c.dist() - dStart._y) + abs(cStart._x - dStart._x - d.dist());
+            result = abs(d.pos()._x - c.pos()._x) + abs(d.pos()._y - c.pos()._y);
         }
     }
     return result;

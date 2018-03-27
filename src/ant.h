@@ -12,8 +12,8 @@ public:
     ~Ant() {}
     bool isOrigin() {return _isOrigin;}
     CTarget dealwithData(CDriver& d, vector<CPack> packList);
-    void randList(vector<vector<int>>& list, vector<CPack> packList);
-    vector<CTarget> dealwithHolding(CDriver& d, vector<CTarget> allTargetList);
+    vector<CTarget> dealwithHolding(CDriver& d, vector<CTarget> driverList);
+    void dealwithWaiting(CDriver& d, vector<CTarget>& targetList, vector<CPack> packList);
 private:
     bool _isOrigin = 0;
     int _maxLoop;
