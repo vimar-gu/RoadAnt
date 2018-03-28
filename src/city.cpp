@@ -65,7 +65,7 @@ CCity::CCity()
 void CCity::start() {
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(fresh()));
-    timer->start(1000);
+    timer->start(200);
 }
 
 void CCity::generatePack() {
@@ -89,13 +89,21 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     Ant ant(10, 1);
     CTarget nextTarget = ant.dealwithData(d, packList);
     CVel vel;
-    if (isOntheRight(d, nextTarget)) {
-        if (d.start()._x == d.end()._x) vel = CVel(d.level(), 0);
-        else vel = CVel(0, d.level());
-    }
+    if (nextTarget.pos()._x == 0 && nextTarget.pos()._y == 0) vel = CVel(0, 0);
     else {
-        if (d.start()._x == d.end()._x) vel = CVel(-d.level(), 0);
-        else vel = CVel(0, -d.level());
+        auto pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p){return p.source() == nextTarget;});
+        if (pos != _packWaiting.end()) {
+            d.pickPack(*pos);
+            _packWaiting.erase(pos);
+        }
+        if (isOntheRight(d, nextTarget)) {
+            if (d.start()._x == d.end()._x) vel = CVel(d.level(), 0);
+            else vel = CVel(0, d.level());
+        }
+        else {
+            if (d.start()._x == d.end()._x) vel = CVel(-d.level(), 0);
+            else vel = CVel(0, -d.level());
+        }
     }
     d.setVel(vel);
 }

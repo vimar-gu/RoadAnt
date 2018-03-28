@@ -5,15 +5,14 @@
 
 CTarget Ant::dealwithData(CDriver& d, vector<CPack> packList) {
 
-    vector<CTarget> driverList;
-    for (auto& elem : d.pickingPacks()) {
+    vector<CPack> driverList;
+    for (auto elem : d.pickingPacks()) {
         qDebug() << "pick";
-        driverList.push_back(elem.destination());
+        driverList.push_back(elem);
     }
-    for (auto& elem : d.holdingPacks()) {
+    for (auto elem : d.holdingPacks()) {
         qDebug() << "hold";
-        driverList.push_back(elem.source());
-        driverList.push_back(elem.destination());
+        driverList.push_back(elem);
     }
     vector<CTarget> targetList = dealwithHolding(d, driverList);
     dealwithWaiting(d, targetList, packList);
@@ -22,18 +21,19 @@ CTarget Ant::dealwithData(CDriver& d, vector<CPack> packList) {
     targetList.erase(targetList.begin());
     if (!targetList.empty()) nextTarget = targetList.front();
     else nextTarget = CTarget();
+    qDebug() << nextTarget.pos()._x << nextTarget.pos()._y;
 
     return nextTarget;
 }
 
-vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CTarget> driverList) {
+vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
     vector<vector<CTarget>> routeRec;
     vector<CTarget> bestRec;
     vector<double> costRec;
     double minCost = 10000;
     routeRec.resize(_antNum);
     _targetNum = driverList.size();
-    _routeNum = _targetNum * (_targetNum - 1) / 2;
+    _routeNum = _targetNum * (_targetNum + 1) / 2;
     _routeTau.resize(_routeNum);
 
     for (int cnt = 0; cnt < _maxLoop; cnt++) {
@@ -45,23 +45,38 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CTarget> driverList) {
 
         for (int i = 0; i < _antNum; i++) {
             vector<CTarget> targetList;
-            vector<CTarget> allTargetList = driverList;
+            vector<CPack> allPackList = driverList;
             CRoad driverRoad(d.start(), d.end(), d.level());
             CTarget driverTarget(driverRoad, d.dist());
             targetList.push_back(driverTarget);
 
             while (targetList.size() < _targetNum + 1) {
                 int minDist = 10000;
-                CTarget nextTarget;
-                for (auto& elem : allTargetList) {
-                    CTarget lastTarget = targetList.back();
-                    if (distBetween(lastTarget, elem) < minDist) { // waited to be modified
-                        minDist = distBetween(lastTarget, elem);
-                        nextTarget = elem;
+                CPack nextPack;
+                CTarget compareTarget;
+                CTarget lastTarget;
+                vector<CPack>::iterator pos;
+                for (auto elem : allPackList) {
+                    lastTarget = targetList.back();
+                    if (elem.state() == 2) compareTarget = elem.destination(); // holding
+                    else compareTarget = elem.source(); // picking
+                    if (distBetween(lastTarget, compareTarget) < minDist) { // waited to be modified
+                        minDist = distBetween(lastTarget, compareTarget);
+                        nextPack = elem;
                     }
                 }
-                auto pos = find_if(allTargetList.begin(), allTargetList.end(), [=](CTarget t){return t == nextTarget;});
-                allTargetList.erase(pos);
+                if (nextPack.state() == 2) {
+                    pos = find_if(allPackList.begin(), allPackList.end(), [=](CPack p)
+                        {return p.destination() == nextPack.destination();});
+                    allPackList.erase(pos);
+                    targetList.push_back(nextPack.destination());
+                }
+                else {
+                    pos = find_if(allPackList.begin(), allPackList.end(), [=](CPack p)
+                        {return p.destination() == nextPack.source();});
+                    (*pos).setStateHold();
+                    targetList.push_back(nextPack.source());
+                }
             }
 
             double cost = calcCost(targetList);
