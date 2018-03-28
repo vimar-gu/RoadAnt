@@ -3,27 +3,20 @@
 #include "utils.h"
 #include <QDebug>
 
-CTarget Ant::dealwithData(CDriver& d, vector<CPack> packList) {
+vector<CTarget> Ant::dealwithData(CDriver& d, vector<CPack> packList) {
 
     vector<CPack> driverList;
     for (auto elem : d.pickingPacks()) {
-        qDebug() << "pick";
         driverList.push_back(elem);
     }
     for (auto elem : d.holdingPacks()) {
-        qDebug() << "hold";
         driverList.push_back(elem);
     }
     vector<CTarget> targetList = dealwithHolding(d, driverList);
     dealwithWaiting(d, targetList, packList);
 
-    CTarget nextTarget;
-    targetList.erase(targetList.begin());
-    if (!targetList.empty()) nextTarget = targetList.front();
-    else nextTarget = CTarget();
-    qDebug() << nextTarget.pos()._x << nextTarget.pos()._y;
-
-    return nextTarget;
+    if (!targetList.empty()) targetList.erase(targetList.begin());
+    return targetList;
 }
 
 vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
@@ -31,10 +24,10 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
     vector<CTarget> bestRec;
     vector<double> costRec;
     double minCost = 10000;
-    routeRec.resize(_antNum);
-    _targetNum = driverList.size();
+    routeRec.reserve(_antNum);
+    _targetNum = d.holdingPacks().size() + d.pickingPacks().size() * 2;
     _routeNum = _targetNum * (_targetNum + 1) / 2;
-    _routeTau.resize(_routeNum);
+    _routeTau.reserve(_routeNum);
 
     for (int cnt = 0; cnt < _maxLoop; cnt++) {
 
@@ -50,14 +43,13 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
             CTarget driverTarget(driverRoad, d.dist());
             targetList.push_back(driverTarget);
 
-            while (targetList.size() < _targetNum + 1) {
+            while (targetList.size() < _targetNum + 1 && !allPackList.empty()) {
                 int minDist = 10000;
                 CPack nextPack;
                 CTarget compareTarget;
                 CTarget lastTarget;
-                vector<CPack>::iterator pos;
                 for (auto elem : allPackList) {
-                    lastTarget = targetList.back();
+                    if (!targetList.empty()) lastTarget = targetList.back();
                     if (elem.state() == 2) compareTarget = elem.destination(); // holding
                     else compareTarget = elem.source(); // picking
                     if (distBetween(lastTarget, compareTarget) < minDist) { // waited to be modified
@@ -65,17 +57,22 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
                         nextPack = elem;
                     }
                 }
-                if (nextPack.state() == 2) {
-                    pos = find_if(allPackList.begin(), allPackList.end(), [=](CPack p)
-                        {return p.destination() == nextPack.destination();});
-                    allPackList.erase(pos);
-                    targetList.push_back(nextPack.destination());
-                }
-                else {
-                    pos = find_if(allPackList.begin(), allPackList.end(), [=](CPack p)
-                        {return p.destination() == nextPack.source();});
-                    (*pos).setStateHold();
-                    targetList.push_back(nextPack.source());
+
+                if (nextPack.source().pos()._x != 0) {
+                    if (nextPack.state() == 2) {
+                        auto pos = find_if(allPackList.begin(), allPackList.end(), [=](CPack p)
+                            {return p.destination() == nextPack.destination();});
+                        targetList.push_back(nextPack.destination());
+                        allPackList.erase(pos);
+                    }
+                    else {
+                        for (auto pos = allPackList.begin(); pos != allPackList.end(); pos++) {
+                            if (pos->source() == nextPack.source()) {
+                                targetList.push_back(nextPack.source());
+                                pos->setStateHold();
+                            }
+                        }
+                    }
                 }
             }
 
@@ -96,6 +93,7 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
 
 void Ant::dealwithWaiting(CDriver &d, vector<CTarget> &targetList, vector<CPack> packList) {
     for (auto& elem : packList) {
+//        qDebug() << elem.source().pos()._x << elem.source().pos()._y;
         targetList.push_back(elem.source());
         targetList.push_back(elem.destination());
     }

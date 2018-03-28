@@ -11,7 +11,7 @@ public:
     Ant(int antNum, int loopNum) : _maxLoop(loopNum), _antNum(antNum) {}
     ~Ant() {}
     bool isOrigin() {return _isOrigin;}
-    CTarget dealwithData(CDriver& d, vector<CPack> packList);
+    vector<CTarget> dealwithData(CDriver& d, vector<CPack> packList);
     vector<CTarget> dealwithHolding(CDriver& d, vector<CPack> driverList);
     void dealwithWaiting(CDriver& d, vector<CTarget>& targetList, vector<CPack> packList);
 private:

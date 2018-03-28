@@ -57,7 +57,7 @@ typedef CTarget CStore;
 
 class CPack {
 public:
-    CPack() {}
+    CPack() {CPos start(0, 0); CPos end(0, 0); CRoad r(start, end, 0); _source = CTarget(r, 0); _destination = CTarget(r, 0);}
     CPack(CTarget source, CTarget destination) : _source(source), _destination(destination), _state(0) {}
     const CTarget source() const {return _source;}
     const CTarget destination() const {return _destination;}
@@ -82,8 +82,8 @@ public:
     const int& dist() const {return _dist;}
     void setDist(int dist) {_dist = dist;}
     CPos pos() const;
-    void catchPack(CPack& p);
-    void pickPack(CPack& p);
+    void catchPack(CPack p);
+    void pickPack(CPack p);
     bool isPicking() {return !_packPicking.empty();}
     bool isHolding() {return !_packHolding.empty();}
     void checkHold();
