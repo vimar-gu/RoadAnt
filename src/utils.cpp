@@ -18,16 +18,27 @@ bool isOntheRight(const CDriver &d, const CTarget &t) { // whether target is on 
     if (d.start()._x == d.end()._x) { // the driver's road is vertical
         if (t.start()._x == t.end()._x) {
             if (t.start()._x == d.start()._x) return t.pos()._y > d.pos()._y;
-            else return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
+            else {
+                if (d.dist() == 0) return t.pos()._x > d.pos()._x;
+                else return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
+            }
         }
-        else return t.pos()._x > d.pos()._x;
+        else {
+            if (d.dist() == d.length()) return t.pos()._x > d.pos()._x;
+            else if (d.dist() == 0) return t.pos()._x < d.pos()._x;
+            else return t.pos()._y > d.pos()._y;
+        }
     }
     else {
         if (t.start()._y == t.end()._y) {
             if (t.start()._y == d.start()._y) return t.pos()._x > d.pos()._x;
             else return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
         }
-        else return t.pos()._y > d.pos()._y;
+        else {
+            if (d.dist() == d.length()) return t.pos()._y > d.pos()._y;
+            else if (d.dist() == 0) return t.pos()._y < d.pos()._y;
+            else return t.pos()._x > d.pos()._x;
+        }
     }
 }
 

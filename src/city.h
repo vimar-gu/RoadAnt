@@ -9,6 +9,7 @@ using namespace std;
 struct CPos {
     CPos() {}
     CPos(int x, int y) : _x(x), _y(y) {}
+    bool valid() {return _x != 0 && _y != 0;}
     int _x;
     int _y;
 };

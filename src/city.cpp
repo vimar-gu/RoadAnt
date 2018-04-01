@@ -65,7 +65,7 @@ CCity::CCity()
 void CCity::start() {
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(fresh()));
-    timer->start(200);
+    timer->start(50);
 }
 
 void CCity::generatePack() {
@@ -76,6 +76,7 @@ void CCity::generatePack() {
     if (pos != _packWaiting.end()) return;
 
     for (CDriver& elem : _driverList) {
+        //if (elem.start() == s.start() || elem.start() == s.end() || elem.end() == s.start() || elem.end() == s.end()) return;
         for (CPack& packElem : elem.pickingPacks()) {
             if (packElem.source() == s) return;
         }
@@ -97,18 +98,28 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     else {
         nextTarget = targetList.front();
         if (isOntheRight(d, nextTarget)) {
-            if (d.start()._x == d.end()._x) vel = CVel(d.level(), 0);
-            else vel = CVel(0, d.level());
+            if (d.start()._x == d.end()._x)
+                if (d.dist() == d.length() || d.dist() == 0) vel = CVel(d.level(), 0);
+                else vel = CVel(0, d.level());
+            else
+                if (d.dist() == d.length()) vel = CVel(0, d.level());
+                else vel = CVel(d.level(), 0);
         }
         else {
-            if (d.start()._x == d.end()._x) vel = CVel(-d.level(), 0);
-            else vel = CVel(0, -d.level());
+            if (d.start()._x == d.end()._x)
+                if (d.dist() == 0) vel = CVel(-d.level(), 0);
+                else vel = CVel(0, -d.level());
+            else
+                if (d.dist() == 0) vel = CVel(0, d.level());
+                else vel = CVel(-d.level(), 0);
         }
 
+        qDebug() << d.pos()._x << d.pos()._y << nextTarget.pos()._x << nextTarget.pos()._y << vel._x << vel._y;
         //set picking packs
         for (auto& elem : targetList) {
             auto pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p){return p.source() == elem;});
             if (pos != _packWaiting.end()) {
+                qDebug() << "pick";
                 d.pickPack(*pos);
                 _packWaiting.erase(pos);
             }
@@ -119,6 +130,7 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
 
 void CCity::applyVel(CDriver& d) {
     if (d.pos() == d.start() || d.pos() == d.end()) {
+        qDebug() << "change";
         if (d.vel()._x > 0) {
             auto r = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r)
             {return r.start() == d.pos() && r.end()._x > r.start()._x;});
@@ -154,6 +166,8 @@ void CCity::applyVel(CDriver& d) {
 vector<CPack> CCity::setPackList(CDriver &d) {
     vector<CPack> packList;
     int density = calcDensity(d);
+    CPos start = d.start();
+    CPos end = d.end();
     if (density <= smallRangeDensity) {
 
     }
@@ -163,8 +177,10 @@ vector<CPack> CCity::setPackList(CDriver &d) {
     else { // need to change working range
 
     }
-    for (auto elem : _packWaiting) {
-        packList.push_back(elem);
+    for (CPack elem : _packWaiting) {
+        if ((d.isPicking() || d.isHolding()) && (elem.source().start() == start || elem.source().end() == start
+                                                 || elem.source().start() == start || elem.source().start() == end)) continue;
+        else packList.push_back(elem);
     }
     return packList;
 }
@@ -218,7 +234,9 @@ void CDriver::catchPack(CPack p) {
 void CDriver::checkHold() {
     for (auto& elem : _packPicking) {
         if (pos() == elem.source().pos()) {
+            qDebug() << "hold";
             CPack holding = elem;
+            holding.setStateHold();
             _packHolding.push_back(holding);
             auto elempos = find_if(_packPicking.begin(), _packPicking.end(), [=](CPack p){return p.source().pos() == pos();});
             _packPicking.erase(elempos);
@@ -228,7 +246,10 @@ void CDriver::checkHold() {
 
 void CDriver::checkDrop() {
     auto elempos = find_if(_packHolding.begin(), _packHolding.end(), [=](CPack p){return p.destination().pos() == pos();});
-    if (elempos != _packHolding.end()) _packHolding.erase(elempos);
+    if (elempos != _packHolding.end()) {
+        qDebug() << "here";
+        _packHolding.erase(elempos);
+    }
 }
 
 void CDriver::changeRoad(CRoad road) {

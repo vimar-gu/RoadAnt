@@ -13,6 +13,10 @@ vector<CTarget> Ant::dealwithData(CDriver& d, vector<CPack> packList) {
         driverList.push_back(elem);
     }
     vector<CTarget> targetList = dealwithHolding(d, driverList);
+//    qDebug() << "start";
+//    for (CTarget& elem : targetList)
+//        qDebug() << elem.pos()._x << elem.pos()._y;
+//    qDebug() << "end";
     dealwithWaiting(d, targetList, packList);
 
     if (!targetList.empty()) targetList.erase(targetList.begin());
@@ -58,7 +62,7 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
                     }
                 }
 
-                if (nextPack.source().pos()._x != 0) {
+                if (nextPack.source().pos().valid()) {
                     if (nextPack.state() == 2) {
                         auto pos = find_if(allPackList.begin(), allPackList.end(), [=](CPack p)
                             {return p.destination() == nextPack.destination();});
