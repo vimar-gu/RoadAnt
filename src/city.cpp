@@ -54,8 +54,10 @@ CCity::CCity()
 
     CRoad tmpRoad = _roadList.front();
     CDriver driver(tmpRoad, 96);
+    CDriver driver2(tmpRoad, 10);
     _driverList.push_back(driver);
-    _driverNum = 1;
+    _driverList.push_back(driver2);
+    _driverNum = 2;
     _roadNum = _roadList.size();
     _storeNum = _storeList.size();
     roadData.close();
@@ -97,24 +99,22 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     if (targetList.empty()) vel = CVel(0, 0);
     else {
         nextTarget = targetList.front();
-        if (isOntheRight(d, nextTarget)) {
-            if (d.start()._x == d.end()._x)
-                if (d.dist() == d.length() || d.dist() == 0) vel = CVel(d.level(), 0);
-                else vel = CVel(0, d.level());
+        bool dir = isOntheRight(d, nextTarget);
+        int level = d.level();
+        if (d.vertical()) { // the driver's road is vertical
+            if (!d.sameRoad(nextTarget) && (d.dist() == 0 || d.dist() == d.length()))
+                vel = dir ? CVel(level, 0) : CVel(-level, 0);
             else
-                if (d.dist() == d.length()) vel = CVel(0, d.level());
-                else vel = CVel(d.level(), 0);
+                vel = dir ? CVel(0, level) : CVel(0, -level);
         }
         else {
-            if (d.start()._x == d.end()._x)
-                if (d.dist() == 0) vel = CVel(-d.level(), 0);
-                else vel = CVel(0, -d.level());
+            if (!d.sameRoad(nextTarget) && (d.dist() == 0 || d.dist() == d.length()))
+                vel = dir ? CVel(0, level) : CVel(0, -level);
             else
-                if (d.dist() == 0) vel = CVel(0, d.level());
-                else vel = CVel(-d.level(), 0);
+                vel = dir ? CVel(level, 0) : CVel(-level, 0);
         }
 
-        qDebug() << d.pos()._x << d.pos()._y << nextTarget.pos()._x << nextTarget.pos()._y << vel._x << vel._y;
+        //qDebug() << d.pos()._x << d.pos()._y << nextTarget.pos()._x << nextTarget.pos()._y << vel._x << vel._y << isOntheRight(d, nextTarget);
         //set picking packs
         for (auto& elem : targetList) {
             auto pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p){return p.source() == elem;});
@@ -247,7 +247,7 @@ void CDriver::checkHold() {
 void CDriver::checkDrop() {
     auto elempos = find_if(_packHolding.begin(), _packHolding.end(), [=](CPack p){return p.destination().pos() == pos();});
     if (elempos != _packHolding.end()) {
-        qDebug() << "here";
+        qDebug() << "drop";
         _packHolding.erase(elempos);
     }
 }
@@ -258,4 +258,16 @@ void CDriver::changeRoad(CRoad road) {
      setLevel(road.level());
      if (_vel.mod() > 0) setDist(1);
      else setDist(road.length() - 1);
+}
+
+bool CRoad::parallel(CRoad r) const {
+    if (this->vertical() && r.vertical()) return this->start()._x != r.start()._x;
+    else if (!this->vertical() && !r.vertical()) return this->start()._y != r.start()._y;
+    else return false;
+}
+
+bool CRoad::sameRoad(CRoad r) const {
+    if (this->vertical() && r.vertical()) return this->start()._x == r.start()._x;
+    else if (!this->vertical() && !r.vertical()) return this->start()._y == r.start()._y;
+    else return false;
 }

@@ -35,6 +35,9 @@ public:
     const int& level() const {return _level;}
     const int& length() const {return _length;}
     bool onTheRoad(CPos pos) {return pos._x >= _start._x && pos._x <= _end._x && pos._y >= _start._y && pos._y <= _end._y;}
+    bool vertical() const {return _start._x == _end._x;}
+    bool parallel(CRoad r) const;
+    bool sameRoad(CRoad r) const;
     void setStart(CPos start) {_start = start;}
     void setEnd(CPos end) {_end = end;}
     void setLevel(int level) {_level = level;}

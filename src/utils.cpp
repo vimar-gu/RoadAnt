@@ -15,30 +15,17 @@ bool operator ==(const CPack& p1, const CPack p2) {
 }
 
 bool isOntheRight(const CDriver &d, const CTarget &t) { // whether target is on the right of driver
-    if (d.start()._x == d.end()._x) { // the driver's road is vertical
-        if (t.start()._x == t.end()._x) {
-            if (t.start()._x == d.start()._x) return t.pos()._y > d.pos()._y;
-            else {
-                if (d.dist() == 0) return t.pos()._x > d.pos()._x;
-                else return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
-            }
-        }
-        else {
-            if (d.dist() == d.length()) return t.pos()._x > d.pos()._x;
-            else if (d.dist() == 0) return t.pos()._x < d.pos()._x;
-            else return t.pos()._y > d.pos()._y;
-        }
+    if (d.vertical()) {
+        if (d.sameRoad(t)) return t.pos()._y > d.pos()._y;
+        else if (d.dist() == 0 || d.dist() == d.length()) return t.pos()._x > d.pos()._x;
+        else if (d.parallel(t)) return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
+        else return t.pos()._y > d.pos()._y;
     }
     else {
-        if (t.start()._y == t.end()._y) {
-            if (t.start()._y == d.start()._y) return t.pos()._x > d.pos()._x;
-            else return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
-        }
-        else {
-            if (d.dist() == d.length()) return t.pos()._y > d.pos()._y;
-            else if (d.dist() == 0) return t.pos()._y < d.pos()._y;
-            else return t.pos()._x > d.pos()._x;
-        }
+        if (d.sameRoad(t)) return t.pos()._x > d.pos()._x;
+        else if (d.dist() == 0 || d.dist() == d.length()) return t.pos()._y > d.pos()._y;
+        else if (d.parallel(t)) return t.length() - t.dist() + d.length() - d.dist() < t.dist() + d.dist();
+        else return t.pos()._x > d.pos()._x;
     }
 }
 
@@ -51,7 +38,7 @@ int distBetween(CTarget d, CTarget c) {
 
     if (dStart._x == dEnd._x) { // the driver's road is vertical
         if (cStart._x == cEnd._x && cStart._x != dStart._x) { // the store's road is vertical
-                result = min(c.length() - c.dist() + d.length() - d.dist(), c.dist() + d.dist());
+                result = abs(c.pos()._x - d.pos()._x) + min(c.length() - c.dist() + d.length() - d.dist(), c.dist() + d.dist());
         }
         else { // the store's road is horizontal
             result = abs(d.pos()._x - c.pos()._x) + abs(d.pos()._y - c.pos()._y);
@@ -59,7 +46,7 @@ int distBetween(CTarget d, CTarget c) {
     }
     else { // the driver's road is horizontal
         if (cStart._y == cEnd._y && cStart._y != dStart._y) { //the store's road is horizontal
-                result = min(c.length() - c.dist() + d.length() - d.dist(), c.dist() + d.dist());
+                result = abs(c.pos()._y - d.pos()._y) + min(c.length() - c.dist() + d.length() - d.dist(), c.dist() + d.dist());
         }
         else {
             result = abs(d.pos()._x - c.pos()._x) + abs(d.pos()._y - c.pos()._y);
