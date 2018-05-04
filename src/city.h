@@ -90,8 +90,8 @@ public:
     void pickPack(CPack p);
     bool isPicking() {return !_packPicking.empty();}
     bool isHolding() {return !_packHolding.empty();}
-    void checkHold();
-    void checkDrop();
+    bool checkHold();
+    bool checkDrop();
     vector<CPack> holdingPacks() {return _packHolding;}
     vector<CPack> pickingPacks() {return _packPicking;}
     void setVel(CVel vel) {_vel = vel;}
@@ -118,6 +118,8 @@ public:
     int storeNum() {return _storeNum;}
     int driverNum() {return _driverNum;}
     int packNum() {return _packWaiting.size();}
+    int pickedCase() {return _pickedCase;}
+    int finishedCase() {return _finishedCase;}
     CRoad road(int i) {return _roadList.at(i);}
     CDriver driver(int i) {return _driverList.at(i);}
     CStore store(int i) {return _storeList.at(i);}
@@ -134,6 +136,8 @@ private:
     int _roadNum;
     int _storeNum;
     int _driverNum;
+    int _finishedCase;
+    int _pickedCase;
 };
 
 typedef Singleton<CCity> City;

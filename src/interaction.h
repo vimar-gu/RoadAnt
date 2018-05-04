@@ -6,8 +6,9 @@ class Interaction : public QObject
 {
     Q_OBJECT
 public:
-    Interaction() {}
+    explicit Interaction(QObject *parent = 0);
     Q_INVOKABLE void setVision();
+    Q_INVOKABLE int finishedNum();
 };
 
 #endif // INTERACTION_H

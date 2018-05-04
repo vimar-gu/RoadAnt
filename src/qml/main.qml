@@ -20,13 +20,42 @@ ApplicationWindow {
             width: 640
             height: 480
         }
-        Button {
-            id: start
-            text: "start"
-            width: 200
-            height: 200
-            onClicked: {
-                interaction.setVision();
+        Column {
+            Button {
+                id: start
+                text: "start"
+                width: 200
+                height: 200
+                onClicked: {
+                    interaction.setVision();
+                }
+            }
+            Label {
+                id: finished
+                x: 0
+                y: 200
+                text: "finished case number"
+                font.pointSize: 11
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                width: 200
+                height: 50
+            }
+            Text {
+                id: finishedCaseNum
+                width: 200
+                height: 50
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                Timer {
+                    id: timer1
+                    interval: 50
+                    running: true
+                    repeat: true
+                    onTriggered: {
+                        finishedCaseNum.text = interaction.finishedCase;
+                    }
+                }
             }
         }
     }

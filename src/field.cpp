@@ -52,6 +52,13 @@ void Field::paintDriver(const QColor &color, qreal x, qreal y) {
     pixmapPainter.drawEllipse(x - radius, y - radius,2 * radius, 2 * radius);
 }
 
+void Field::paintTartget(const QColor &color, qreal x, qreal y) {
+    static float radius = 5;
+    pixmapPainter.setBrush(QBrush(color));
+    pixmapPainter.setPen(Qt::NoPen);
+    pixmapPainter.drawEllipse(x - radius, y - radius, 2 * radius, 2 * radius);
+}
+
 void Field::fillField() {
     for (int i = 0; i < City::instance()->roadNum() - 1; i++) {
         CPos start = City::instance()->road(i).start();
@@ -68,5 +75,13 @@ void Field::fillField() {
     }
     for (int i = 0; i < City::instance()->packNum(); i++) {
         paintPack(Qt::white, City::instance()->pack(i).source().pos()._x, City::instance()->pack(i).source().pos()._y);
+    }
+    for (int i = 0; i < City::instance()->driverNum(); i++) {
+        vector<CPack> d = City::instance()->driver(i).holdingPacks();
+        for (int j = 0; j < d.size(); j++) {
+            CPack p = d.at(j);
+            CTarget t = p.destination();
+            paintTartget(COLOR_GREEN, t.pos()._x, t.pos()._y);
+        }
     }
 }

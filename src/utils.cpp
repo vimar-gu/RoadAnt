@@ -37,16 +37,16 @@ int distBetween(CTarget d, CTarget c) {
     CPos cEnd = c.end();
 
     if (dStart._x == dEnd._x) { // the driver's road is vertical
-        if (cStart._x == cEnd._x && cStart._x != dStart._x) { // the store's road is vertical
-                result = abs(c.pos()._x - d.pos()._x) + min(c.length() - c.dist() + d.length() - d.dist(), c.dist() + d.dist());
+        if (cStart._x == cEnd._x && cStart._x != dStart._x && cStart._y == dStart._y) { // the store's road is vertical
+                result = abs(c.pos()._x - d.pos()._x) + min(abs(c.length() - c.dist() + d.length() - d.dist()), c.dist() + d.dist());
         }
         else { // the store's road is horizontal
             result = abs(d.pos()._x - c.pos()._x) + abs(d.pos()._y - c.pos()._y);
         }
     }
     else { // the driver's road is horizontal
-        if (cStart._y == cEnd._y && cStart._y != dStart._y) { //the store's road is horizontal
-                result = abs(c.pos()._y - d.pos()._y) + min(c.length() - c.dist() + d.length() - d.dist(), c.dist() + d.dist());
+        if (cStart._y == cEnd._y && cStart._y != dStart._y && cStart._x == dStart._x) { //the store's road is horizontal
+                result = abs(c.pos()._y - d.pos()._y) + min(abs(c.length() - c.dist() + d.length() - d.dist()), c.dist() + d.dist());
         }
         else {
             result = abs(d.pos()._x - c.pos()._x) + abs(d.pos()._y - c.pos()._y);
@@ -62,5 +62,15 @@ int distBetween(CDriver d, CTarget c) {
 }
 
 double calcCost(vector<CTarget> targetList) {
-    return 0;
+    double cost = 0;
+
+    // add distance cost
+    CTarget thisTarget, nextTarget;
+    for (int i = 0; i < targetList.size() - 1; i++) {
+        thisTarget = targetList.at(i);
+        nextTarget = targetList.at(i + 1);
+        cost += distBetween(thisTarget, nextTarget);
+    }
+
+    return cost;
 }

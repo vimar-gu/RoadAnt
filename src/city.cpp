@@ -84,6 +84,7 @@ void CCity::generatePack() {
         }
     }
 
+    r = rand() % (_roadNum - 1);
     CRoad road = _roadList.at(r);
     int d = rand() % road.length();
     CTarget t(road, d);
@@ -99,6 +100,7 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     if (targetList.empty()) vel = CVel(0, 0);
     else {
         nextTarget = targetList.front();
+        qDebug() << d.pos()._x << d.pos()._y << nextTarget.pos()._x << nextTarget.pos()._y;
         bool dir = isOntheRight(d, nextTarget);
         int level = d.level();
         if (d.vertical()) { // the driver's road is vertical
@@ -156,10 +158,14 @@ void CCity::applyVel(CDriver& d) {
         d.setDist(d.dist() + d.vel().mod());
     }
     if (d.isPicking()) {
-        d.checkHold();
+        if(d.checkHold()) {
+            _pickedCase++;
+        }
     }
     if (d.isHolding()) {
-        d.checkDrop();
+        if(d.checkDrop()) {
+            _finishedCase++;
+        }
     }
 }
 
@@ -231,7 +237,7 @@ void CDriver::catchPack(CPack p) {
     _packHolding.push_back(p);
 }
 
-void CDriver::checkHold() {
+bool CDriver::checkHold() {
     for (auto& elem : _packPicking) {
         if (pos() == elem.source().pos()) {
             qDebug() << "hold";
@@ -240,16 +246,20 @@ void CDriver::checkHold() {
             _packHolding.push_back(holding);
             auto elempos = find_if(_packPicking.begin(), _packPicking.end(), [=](CPack p){return p.source().pos() == pos();});
             _packPicking.erase(elempos);
+            return true;
         }
     }
+    return false;
 }
 
-void CDriver::checkDrop() {
+bool CDriver::checkDrop() {
     auto elempos = find_if(_packHolding.begin(), _packHolding.end(), [=](CPack p){return p.destination().pos() == pos();});
     if (elempos != _packHolding.end()) {
         qDebug() << "drop";
         _packHolding.erase(elempos);
+        return true;
     }
+    return false;
 }
 
 void CDriver::changeRoad(CRoad road) {
