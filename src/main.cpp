@@ -6,8 +6,8 @@
 #include "city.h"
 
 void qmlRegister(){
-    qmlRegisterType<Field>("Client.Component", 1, 0, "Field");
-    qmlRegisterType<Interaction>("Client.Component", 1, 0, "Interaction");
+    qmlRegisterType<Field>("Client.Component", 2, 0, "Field");
+    qmlRegisterType<Interaction>("Client.Component", 2, 0, "Interaction");
 }
 
 int main(int argc, char *argv[])

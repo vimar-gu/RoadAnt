@@ -3,7 +3,7 @@ import QtQuick.Window 2.0
 import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 import QtQuick.Layouts 1.0
-import Client.Component 1.0 as Client
+import Client.Component 2.0 as Client
 
 ApplicationWindow {
     id: root
@@ -23,9 +23,17 @@ ApplicationWindow {
         Column {
             Button {
                 id: start
-                text: "start"
                 width: 200
                 height: 200
+                Label {
+                    id: buttonLabel
+                    width: 200
+                    height: 200
+                    text: "start"
+                    font.pointSize: 15
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                }
                 onClicked: {
                     interaction.setVision();
                 }
@@ -41,11 +49,11 @@ ApplicationWindow {
                 width: 200
                 height: 50
             }
-            Text {
+            Label {
                 id: finishedCaseNum
                 width: 200
-                height: 50
-                verticalAlignment: Text.AlignVCenter
+                height: 20
+                text: "0"
                 horizontalAlignment: Text.AlignHCenter
                 Timer {
                     id: timer1
@@ -53,7 +61,7 @@ ApplicationWindow {
                     running: true
                     repeat: true
                     onTriggered: {
-                        finishedCaseNum.text = interaction.finishedCase;
+                        finishedCaseNum.text = "" + interaction.finishedNum()
                     }
                 }
             }

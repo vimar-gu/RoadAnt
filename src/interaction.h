@@ -1,6 +1,7 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 #include <QObject>
+#include <string>
 
 class Interaction : public QObject
 {
@@ -9,6 +10,7 @@ public:
     explicit Interaction(QObject *parent = 0);
     Q_INVOKABLE void setVision();
     Q_INVOKABLE int finishedNum();
+    ~Interaction();
 };
 
 #endif // INTERACTION_H

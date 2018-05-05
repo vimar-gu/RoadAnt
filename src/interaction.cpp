@@ -12,3 +12,6 @@ void Interaction::setVision(){
 int Interaction::finishedNum(){
     return City::instance()->finishedCase();
 }
+
+Interaction::~Interaction() {
+}

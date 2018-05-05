@@ -100,7 +100,7 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
     if (targetList.empty()) vel = CVel(0, 0);
     else {
         nextTarget = targetList.front();
-        qDebug() << d.pos()._x << d.pos()._y << nextTarget.pos()._x << nextTarget.pos()._y;
+//        qDebug() << d.pos()._x << d.pos()._y << nextTarget.pos()._x << nextTarget.pos()._y;
         bool dir = isOntheRight(d, nextTarget);
         int level = d.level();
         if (d.vertical()) { // the driver's road is vertical
