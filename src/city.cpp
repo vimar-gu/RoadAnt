@@ -13,6 +13,7 @@
 using namespace std;
 QString ROAD_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/roadData.txt";
 QString STORE_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/storeData.txt";
+QString DRIVER_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/driverData.txt";
 
 namespace {
     double smallRangeDensity = 2;
@@ -23,7 +24,9 @@ CCity::CCity()
 {
     QFile roadData(ROAD_DATA_DIR);
     QFile storeData(STORE_DATA_DIR);
-    if (!roadData.open(QIODevice::ReadOnly | QIODevice::Text) || !storeData.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QFile driverData(DRIVER_DATA_DIR);
+    if (!roadData.open(QIODevice::ReadOnly | QIODevice::Text) || !storeData.open(QIODevice::ReadOnly | QIODevice::Text)
+            || !driverData.open(QIODevice::ReadOnly | QIODevice::Text)) {
         cout << "Open Failed" << endl;
     }
 
@@ -52,18 +55,23 @@ CCity::CCity()
         _storeList.push_back(s);
     }
 
-    CRoad tmpRoad = _roadList.front();
-    CDriver driver(tmpRoad, 96);
-    CDriver driver2(tmpRoad, 10);
-    CDriver driver3(tmpRoad, 50);
-    _driverList.push_back(driver);
-    _driverList.push_back(driver2);
-    _driverList.push_back(driver3);
+    QTextStream driverDataStream(&driverData);
+    while (!driverDataStream.atEnd()) {
+        driverDataStream >> x >> y;
+        CPos start(x, y);
+        driverDataStream >> x >> y;
+        CPos end(x, y);
+        auto tmpRoad = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r){return r.start() == start && r.end() == end;});
+        driverDataStream >> dist;
+        CDriver d(*tmpRoad, dist);
+        _driverList.push_back(d);
+    }
     _driverNum = _driverList.size();
     _roadNum = _roadList.size();
     _storeNum = _storeList.size();
     roadData.close();
     storeData.close();
+    driverData.close();
 }
 
 void CCity::start() {
@@ -213,7 +221,7 @@ void CCity::fresh() {
     emit needDraw();
 
     generatePack();
-    for (int i = 0; i < _driverNum; i++) {
+    for (int i = 0; i < _driverNum - 1; i++) {
         auto& d = _driverList.at(i);
         vector<CPack> packs = setPackList(d);
         calcVel(d, packs);

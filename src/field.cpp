@@ -67,7 +67,7 @@ void Field::fillField() {
         QPointF qend(end._x, end._y);
         paintRoad(COLOR_ORANGE, qstart, qend);
     }
-    for (int i = 0; i < City::instance()->driverNum(); i++) {
+    for (int i = 0; i < City::instance()->driverNum() - 1; i++) {
         paintDriver(COLOR_PINK, City::instance()->driver(i).pos()._x, City::instance()->driver(i).pos()._y);
     }
     for (int i = 0; i < City::instance()->storeNum() - 1; i++) {
@@ -76,7 +76,7 @@ void Field::fillField() {
     for (int i = 0; i < City::instance()->packNum(); i++) {
         paintPack(Qt::white, City::instance()->pack(i).source().pos()._x, City::instance()->pack(i).source().pos()._y);
     }
-    for (int i = 0; i < City::instance()->driverNum(); i++) {
+    for (int i = 0; i < City::instance()->driverNum() - 1; i++) {
         vector<CPack> d = City::instance()->driver(i).holdingPacks();
         for (int j = 0; j < d.size(); j++) {
             CPack p = d.at(j);
