@@ -74,7 +74,7 @@ int getMinDist(CDriver d, CTarget t) {
     return minDist;
 }
 
-double calcCost(vector<CTarget> targetList) {
+double calcCost(vector<CTarget> targetList, vector<CPack> packList) {
     double cost = 0;
 
     // add distance cost
@@ -83,6 +83,10 @@ double calcCost(vector<CTarget> targetList) {
         thisTarget = targetList.at(i);
         nextTarget = targetList.at(i + 1);
         cost += distBetween(thisTarget, nextTarget);
+    }
+
+    for (auto& pack : packList) {
+        cost -= pack.reward();
     }
 
     return cost;

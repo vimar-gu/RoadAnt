@@ -10,7 +10,7 @@ int distBetween(CTarget d, CTarget c);
 int distBetween(CDriver d, CTarget c);
 int distBetween(CDriver d, CPos p);
 int getMinDist(CDriver d, CTarget t);
-double calcCost(vector<CTarget> targetList);
+double calcCost(vector<CTarget> targetList, vector<CPack> packList);
 int calcTime(CPack p, CTarget t);
 
 #endif // UTILS_H

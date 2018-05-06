@@ -195,7 +195,7 @@ vector<CPack> CCity::setPackList(CDriver &d) {
     if (density <= smallRangeDensity) {
         for (CPack elem : _packWaiting) {
             if ((d.isPicking() || d.isHolding()) && (distBetween(d, elem.source().pos()) < 50
-                                                      || distBetween(d, elem.source().pos()) > 150)) continue;
+                                                      || distBetween(d, elem.source().pos()) > 200)) continue;
             else packList.push_back(elem);
         }
     }

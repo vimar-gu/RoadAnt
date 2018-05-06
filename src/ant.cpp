@@ -44,7 +44,7 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
             CTarget driverTarget(driverRoad, d.dist());
             targetList.push_back(driverTarget);
 
-            for (int i = 0; i < _targetNum + 1 && !allPackList.empty(); i++) {
+            while (targetList.size() < _targetNum + 1 && !allPackList.empty()) {
                 int minDist = 10000;
                 CPack nextPack;
                 CTarget compareTarget;
@@ -77,7 +77,7 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
                 }
             }
 
-            double cost = calcCost(targetList);
+            double cost = calcCost(targetList, allPackList);
             costRec.push_back(cost);
             routeRec.push_back(targetList);
         }
