@@ -55,9 +55,11 @@ CCity::CCity()
     CRoad tmpRoad = _roadList.front();
     CDriver driver(tmpRoad, 96);
     CDriver driver2(tmpRoad, 10);
+    CDriver driver3(tmpRoad, 50);
     _driverList.push_back(driver);
     _driverList.push_back(driver2);
-    _driverNum = 2;
+    _driverList.push_back(driver3);
+    _driverNum = _driverList.size();
     _roadNum = _roadList.size();
     _storeNum = _storeList.size();
     roadData.close();
@@ -89,6 +91,10 @@ void CCity::generatePack() {
     int d = rand() % road.length();
     CTarget t(road, d);
     CPack p(s, t);
+    int reward = rand() % 100;
+    int limit = rand() % 200 + 50;
+    p.setReward(reward);
+    p.setTimeList(limit);
     _packWaiting.push_back(p);
 }
 
@@ -103,6 +109,8 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
 //        qDebug() << d.pos()._x << d.pos()._y << nextTarget.pos()._x << nextTarget.pos()._y;
         bool dir = isOntheRight(d, nextTarget);
         int level = d.level();
+        int minDist = getMinDist(d, nextTarget);
+        if (level > minDist) level = minDist;
         if (d.vertical()) { // the driver's road is vertical
             if (!d.sameRoad(nextTarget) && (d.dist() == 0 || d.dist() == d.length()))
                 vel = dir ? CVel(level, 0) : CVel(-level, 0);

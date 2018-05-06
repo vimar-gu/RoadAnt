@@ -61,16 +61,42 @@ int distBetween(CDriver d, CTarget c) {
     return distBetween(tmpTarget, c);
 }
 
+int distBetween(CDriver d, CPos p) {
+    CPos dPos = d.pos();
+    return abs(dPos._x - p._x) + abs(dPos._y - p._y);
+}
+
+int getMinDist(CDriver d, CTarget t) {
+    int minDist = 10000;
+    if (distBetween(d, t) > 0) minDist = distBetween(d, t);
+    if (distBetween(d, d.start()) > 0 && distBetween(d, d.start()) < minDist) minDist = distBetween(d, d.start());
+    if (distBetween(d, d.end()) > 0 && distBetween(d, d.end()) < minDist) minDist = distBetween(d, d.end());
+    return minDist;
+}
+
 double calcCost(vector<CTarget> targetList) {
     double cost = 0;
 
     // add distance cost
     CTarget thisTarget, nextTarget;
-    for (int i = 0; i < targetList.size() - 1; i++) {
+    for (unsigned int i = 0; i < targetList.size() - 1; i++) {
         thisTarget = targetList.at(i);
         nextTarget = targetList.at(i + 1);
         cost += distBetween(thisTarget, nextTarget);
     }
 
     return cost;
+}
+
+int calcTime(CPack p, CTarget t) {
+    CTarget tmps;
+    tmps.setStart(p.source().start());
+    tmps.setEnd(p.source().end());
+    tmps.setDist(p.source().dist());
+    CTarget tmpd;
+    tmpd.setStart(p.source().start());
+    tmpd.setEnd(p.source().end());
+    tmpd.setDist(p.source().dist());
+
+    return distBetween(t, tmps) + distBetween(tmps, tmpd);
 }

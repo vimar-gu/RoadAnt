@@ -13,10 +13,7 @@ vector<CTarget> Ant::dealwithData(CDriver& d, vector<CPack> packList) {
         driverList.push_back(elem);
     }
     vector<CTarget> targetList = dealwithHolding(d, driverList);
-//    qDebug() << "start";
-//    for (CTarget& elem : targetList)
-//        qDebug() << elem.pos()._x << elem.pos()._y;
-//    qDebug() << "end";
+
     dealwithWaiting(d, targetList, packList);
 
     if (!targetList.empty()) targetList.erase(targetList.begin());
@@ -47,7 +44,7 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
             CTarget driverTarget(driverRoad, d.dist());
             targetList.push_back(driverTarget);
 
-            while (targetList.size() < _targetNum + 1 && !allPackList.empty()) {
+            for (int i = 0; i < _targetNum + 1 && !allPackList.empty(); i++) {
                 int minDist = 10000;
                 CPack nextPack;
                 CTarget compareTarget;
@@ -96,8 +93,12 @@ vector<CTarget> Ant::dealwithHolding(CDriver& d, vector<CPack> driverList) {
 }
 
 void Ant::dealwithWaiting(CDriver &d, vector<CTarget> &targetList, vector<CPack> packList) {
+    int costTime = 0;
+    for (auto pos = targetList.begin(); pos != targetList.end() - 1; pos ++) {
+        costTime += distBetween(*pos, *(pos+1));
+    }
     for (auto& elem : packList) {
-//        qDebug() << elem.source().pos()._x << elem.source().pos()._y;
+        if (costTime + calcTime(elem, *(targetList.end()))> elem.limit()) continue;
         targetList.push_back(elem.source());
         targetList.push_back(elem.destination());
     }

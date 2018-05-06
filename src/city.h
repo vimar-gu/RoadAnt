@@ -53,6 +53,7 @@ public:
     CTarget() {}
     CTarget(CRoad road, int dist) : CRoad(road), _dist(dist) {}
     const int& dist() const {return _dist;}
+    void setDist(int dist) {_dist = dist;}
     CPos pos() const;
 private:
     int _dist;
@@ -68,15 +69,19 @@ public:
     const int& reward() const {return _reward;}
     const int& state() const {return _state;}
     const int& limit() const {return _timeLimit;}
+    const int& holdTime() const {return _holdTime;}
     void setStateWait() {_state = 0;}
     void setStatePick() {_state = 1;}
     void setStateHold() {_state = 2;}
+    void setTimeList(int limit) {_timeLimit = limit;}
+    void setReward(int reward) {_reward = reward;}
 private:
     CTarget _source;
     CTarget _destination;
     int _reward;
     int _timeLimit;
     int _state; // 0 for waiting, 1 for picking, 2 for holding
+    int _holdTime;
 };
 
 class CDriver : public CRoad {
