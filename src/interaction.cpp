@@ -13,5 +13,9 @@ int Interaction::finishedNum(){
     return City::instance()->finishedCase();
 }
 
+int Interaction::currentTime() {
+    return City::instance()->currentTime();
+}
+
 Interaction::~Interaction() {
 }

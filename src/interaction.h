@@ -10,6 +10,7 @@ public:
     explicit Interaction(QObject *parent = 0);
     Q_INVOKABLE void setVision();
     Q_INVOKABLE int finishedNum();
+    Q_INVOKABLE int currentTime();
     ~Interaction();
 };
 

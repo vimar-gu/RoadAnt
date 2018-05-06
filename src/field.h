@@ -20,6 +20,7 @@ private:
     void paintDriver(const QColor& color, qreal x, qreal y);
     void paintTartget(const QColor& color, qreal x, qreal y);
     void paintStore(const QColor& color, qreal x, qreal y);
+    void paintPickedCase(const QColor& color, qreal x, qreal y, int num);
     void paintPack(const QColor& color, qreal x, qreal y);
     void fillField();
     QPixmap *pixmap;

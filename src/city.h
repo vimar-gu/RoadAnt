@@ -53,10 +53,13 @@ public:
     CTarget() {}
     CTarget(CRoad road, int dist) : CRoad(road), _dist(dist) {}
     const int& dist() const {return _dist;}
+    const int& pickedCase() const {return _pickedCase;}
+    void pickCase() {_pickedCase++;}
     void setDist(int dist) {_dist = dist;}
     CPos pos() const;
 private:
     int _dist;
+    int _pickedCase;
 };
 typedef CTarget CStore;
 
@@ -125,6 +128,7 @@ public:
     int packNum() {return _packWaiting.size();}
     int pickedCase() {return _pickedCase;}
     int finishedCase() {return _finishedCase;}
+    double currentTime() {return _currentTime;}
     CRoad road(int i) {return _roadList.at(i);}
     CDriver driver(int i) {return _driverList.at(i);}
     CStore store(int i) {return _storeList.at(i);}
@@ -143,6 +147,7 @@ private:
     int _driverNum;
     int _finishedCase;
     int _pickedCase;
+    double _currentTime;
 };
 
 typedef Singleton<CCity> City;

@@ -16,8 +16,8 @@ QString STORE_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/sto
 QString DRIVER_DATA_DIR = "/home/ypbehere/Documents/srtp/RoadAnt/RoadAnt/data/driverData.txt";
 
 namespace {
-    double smallRangeDensity = 2;
-    double midRangeDensity = 5;
+    double smallRangeDensity = 3;
+    double midRangeDensity = 6;
 }
 
 CCity::CCity()
@@ -137,9 +137,14 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
         for (auto& elem : targetList) {
             auto pos = find_if(_packWaiting.begin(), _packWaiting.end(), [=](CPack p){return p.source() == elem;});
             if (pos != _packWaiting.end()) {
-                qDebug() << "pick";
                 d.pickPack(*pos);
                 _packWaiting.erase(pos);
+                auto storePos = find_if(_storeList.begin(), _storeList.end(), [=](CStore s) {
+                    return s.pos() == elem.pos();
+                });
+                if (storePos != _storeList.end()) {
+                    (*storePos).pickCase();
+                }
             }
         }
     }
@@ -148,7 +153,6 @@ void CCity::calcVel(CDriver& d, vector<CPack> packList) {
 
 void CCity::applyVel(CDriver& d) {
     if (d.pos() == d.start() || d.pos() == d.end()) {
-        qDebug() << "change";
         if (d.vel()._x > 0) {
             auto r = find_if(_roadList.begin(), _roadList.end(), [=](CRoad r)
             {return r.start() == d.pos() && r.end()._x > r.start()._x;});
@@ -188,21 +192,25 @@ void CCity::applyVel(CDriver& d) {
 vector<CPack> CCity::setPackList(CDriver &d) {
     vector<CPack> packList;
     int density = calcDensity(d);
-    CPos start = d.start();
-    CPos end = d.end();
     if (density <= smallRangeDensity) {
-
+        for (CPack elem : _packWaiting) {
+            if ((d.isPicking() || d.isHolding()) && (distBetween(d, elem.source().pos()) < 50
+                                                      || distBetween(d, elem.source().pos()) > 150)) continue;
+            else packList.push_back(elem);
+        }
     }
     else if (density <= midRangeDensity) {
-
+        for (CPack elem : _packWaiting) {
+            if ((d.isPicking() || d.isHolding()) && (distBetween(d, elem.source().pos()) < 200
+                                                     || distBetween(d, elem.source().pos()) > 400)) continue;
+            else packList.push_back(elem);
+        }
     }
     else { // need to change working range
-
-    }
-    for (CPack elem : _packWaiting) {
-        if ((d.isPicking() || d.isHolding()) && (elem.source().start() == start || elem.source().end() == start
-                                                 || elem.source().start() == start || elem.source().start() == end)) continue;
-        else packList.push_back(elem);
+        for (CPack elem : _packWaiting) {
+            if ((d.isPicking() || d.isHolding()) && distBetween(d, elem.source().pos()) < 400) continue;
+            else packList.push_back(elem);
+        }
     }
     return packList;
 }
@@ -219,6 +227,7 @@ int CCity::calcDensity(CDriver &d) {
 
 void CCity::fresh() {
     emit needDraw();
+    _currentTime += 0.05;
 
     generatePack();
     for (int i = 0; i < _driverNum - 1; i++) {
@@ -256,7 +265,6 @@ void CDriver::catchPack(CPack p) {
 bool CDriver::checkHold() {
     for (auto& elem : _packPicking) {
         if (pos() == elem.source().pos()) {
-            qDebug() << "hold";
             CPack holding = elem;
             holding.setStateHold();
             _packHolding.push_back(holding);
@@ -271,7 +279,6 @@ bool CDriver::checkHold() {
 bool CDriver::checkDrop() {
     auto elempos = find_if(_packHolding.begin(), _packHolding.end(), [=](CPack p){return p.destination().pos() == pos();});
     if (elempos != _packHolding.end()) {
-        qDebug() << "drop";
         _packHolding.erase(elempos);
         return true;
     }
